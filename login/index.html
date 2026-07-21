@@ -1,1 +1,94 @@
-<!doctype html><html lang="sk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Prihlásenie — CSP Club Manager</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/styles.css"><style>.login{min-height:100vh;display:grid;place-items:center;padding:24px}.login-card{width:min(420px,100%);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px}.login-card .brand{padding:0 0 22px}.login-card h1{margin:0 0 8px}.login-card p{color:var(--muted)}.login-card input{width:100%;padding:12px;margin:7px 0;background:var(--bg);border:1px solid var(--line);border-radius:9px;color:var(--fg)}.login-card button{width:100%;padding:12px;margin-top:10px;border:0;border-radius:9px;background:var(--gold);font-weight:800;color:#1a1000}.error{color:#ff8e88;min-height:20px;font-size:13px}</style></head><body><main class="login"><section class="login-card"><div class="brand"><div class="brand-mark">C</div><div><div class="brand-name"><span>Connect</span>Sports<span>Pro</span></div><div class="brand-sub">Club Manager</div></div></div><h1>Prihlásenie</h1><p>Prístup je aktívny pre Ultra, Elite a Admin.</p><form id="form"><input id="email" type="email" placeholder="E-mail" required><input id="password" type="password" placeholder="Heslo" required><div class="error" id="error"></div><button>Prihlásiť sa</button></form></section></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../assets/config.js"></script><script src="../assets/app.js"></script><script>const A=CSPClubManager;A.session().then(s=>{if(s)location.replace(A.route('dashboard/'))});document.getElementById('form').onsubmit=async e=>{e.preventDefault();const btn=e.currentTarget.querySelector('button');btn.disabled=true;error.textContent='';const {error:err}=await A.db.auth.signInWithPassword({email:email.value.trim(),password:password.value});btn.disabled=false;if(err){error.textContent=err.message;return}const q=new URLSearchParams(location.search);location.replace(q.get('returnTo')||A.route('dashboard/'))};</script></body></html>
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prihlásenie — CSP Club Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/styles.css">
+<style>
+.login{min-height:100vh;display:grid;place-items:center;padding:24px}
+.login-card{width:min(420px,100%);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px}
+.login-card .brand{padding:0 0 22px}
+.login-card h1{margin:0 0 8px}
+.login-card p{color:var(--muted)}
+.login-card input{width:100%;padding:12px;margin:7px 0;background:var(--bg);border:1px solid var(--line);border-radius:9px;color:var(--fg)}
+.login-card button{width:100%;padding:12px;margin-top:10px;border:0;border-radius:9px;background:var(--gold);font-weight:800;color:#1a1000;cursor:pointer}
+.login-card button:disabled{opacity:.6;cursor:wait}
+.error{color:#ff8e88;min-height:20px;font-size:13px}
+</style>
+</head>
+<body>
+<main class="login">
+  <section class="login-card">
+    <div class="brand">
+      <div class="brand-mark">C</div>
+      <div>
+        <div class="brand-name"><span>Connect</span>Sports<span>Pro</span></div>
+        <div class="brand-sub">Club Manager</div>
+      </div>
+    </div>
+
+    <h1>Prihlásenie</h1>
+    <p>Prístup je aktívny pre Ultra, Elite a Admin.</p>
+
+    <form id="loginForm">
+      <input id="loginEmail" type="email" placeholder="E-mail" autocomplete="email" required>
+      <input id="loginPassword" type="password" placeholder="Heslo" autocomplete="current-password" required>
+      <div class="error" id="loginError"></div>
+      <button id="loginButton" type="submit">Prihlásiť sa</button>
+    </form>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/config.js"></script>
+<script src="../assets/app.js"></script>
+<script>
+(() => {
+  'use strict';
+
+  const A = window.CSPClubManager;
+  const form = document.getElementById('loginForm');
+  const emailInput = document.getElementById('loginEmail');
+  const passwordInput = document.getElementById('loginPassword');
+  const errorBox = document.getElementById('loginError');
+  const button = document.getElementById('loginButton');
+
+  A.session()
+    .then(session => {
+      if (session) location.replace(A.route('dashboard/'));
+    })
+    .catch(error => {
+      errorBox.textContent = error.message;
+    });
+
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+
+    errorBox.textContent = '';
+    button.disabled = true;
+    button.textContent = 'Prihlasujem…';
+
+    try {
+      const { error } = await A.db.auth.signInWithPassword({
+        email: emailInput.value.trim(),
+        password: passwordInput.value
+      });
+
+      if (error) throw error;
+
+      const params = new URLSearchParams(location.search);
+      const returnTo = params.get('returnTo');
+      location.replace(returnTo || A.route('dashboard/'));
+    } catch (error) {
+      errorBox.textContent = error?.message || 'Prihlásenie zlyhalo.';
+      button.disabled = false;
+      button.textContent = 'Prihlásiť sa';
+    }
+  });
+})();
+</script>
+</body>
+</html>
