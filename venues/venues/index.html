@@ -8,8 +8,17 @@
 <link rel="stylesheet" href="../assets/styles.css">
 <style>
 .section-title{margin:0 0 10px}
-.form-grid{display:grid;grid-template-columns:1.5fr 1.2fr 1fr auto;gap:10px}
-.save-btn{min-width:150px}
+.form-grid{
+  display:grid;
+  grid-template-columns:1.5fr 1.2fr 1fr auto;
+  gap:10px;
+  align-items:stretch;
+}
+.save-settings-btn{
+  min-width:200px;
+  min-height:48px;
+  font-weight:800;
+}
 .helper{margin:0 0 14px;color:var(--muted);font-size:13px;line-height:1.5}
 .setup-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
 .setup-stat{padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.025)}
@@ -18,7 +27,7 @@
 @media(max-width:900px){.form-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:700px){
   .form-grid,.setup-summary{grid-template-columns:1fr}
-  .save-btn{width:100%}
+  .save-settings-btn{width:100%}
 }
 </style>
 </head>
@@ -45,7 +54,7 @@
 
     <section class="content">
       <div class="page-head">
-        <h1>Športoviská</h1>
+        <h1>Nastavenie športoviska</h1>
         <p>Pridaj stôl, terč, dráhu alebo miestnosť jedným uložením.</p>
       </div>
 
@@ -55,14 +64,14 @@
         <h3 class="section-title">Nové športovisko</h3>
         <p class="helper">
           Zadaj konkrétnu jednotku, ktorú chceš ovládať na dashboarde.
-          Internú prevádzku systém vytvorí automaticky.
+          Internú hlavnú prevádzku systém vytvorí automaticky.
         </p>
 
         <div class="form-grid">
           <input id="stationName" placeholder="Názov, napr. Stôl 1">
           <input id="stationSport" placeholder="Šport, napr. Biliard">
           <input id="stationRate" type="number" min="0" step="0.10" placeholder="Cena / hod.">
-          <button class="primary save-btn" id="saveBtn">Uložiť</button>
+          <button class="primary save-settings-btn" id="saveSettingsBtn">Uložiť nastavenia</button>
         </div>
       </section>
 
@@ -107,10 +116,8 @@
 
   $('logoutBtn').addEventListener('click', () => A.logout());
 
-  function showNotice(message, type = '') {
-    $('notice').innerHTML = message
-      ? `<div class="notice ${type}">${message}</div>`
-      : '';
+  function showNotice(message) {
+    $('notice').innerHTML = message ? `<div class="notice">${message}</div>` : '';
   }
 
   function escapeHtml(value) {
@@ -145,7 +152,7 @@
   async function getOrCreateDefaultVenue() {
     const existing = await A.db
       .from('venues')
-      .select('id,name')
+      .select('id')
       .eq('club_id', ctx.club.id)
       .eq('is_active', true)
       .order('created_at', { ascending: true })
@@ -173,9 +180,7 @@
     ctx = await A.requireAccess();
     $('clubName').textContent = ctx.club?.name || 'Klub';
 
-    if (!ctx.club) {
-      throw new Error('Klub neexistuje.');
-    }
+    if (!ctx.club) throw new Error('Klub neexistuje.');
 
     const result = await A.db
       .from('stations')
@@ -189,7 +194,7 @@
     render();
   }
 
-  $('saveBtn').addEventListener('click', async () => {
+  $('saveSettingsBtn').addEventListener('click', async () => {
     showNotice('');
 
     const name = $('stationName').value.trim();
@@ -214,7 +219,7 @@
       return;
     }
 
-    const button = $('saveBtn');
+    const button = $('saveSettingsBtn');
     button.disabled = true;
     button.textContent = 'Ukladám…';
 
@@ -240,18 +245,18 @@
       $('stationRate').value = '';
 
       await load();
-      showNotice('Športovisko bolo uložené a je pripravené na dashboarde.', 'success');
+      showNotice('Nastavenia boli uložené. Športovisko je pripravené na dashboarde.');
     } catch (error) {
-      showNotice(error?.message || 'Športovisko sa nepodarilo uložiť.', 'error');
+      showNotice(error?.message || 'Nastavenia sa nepodarilo uložiť.');
     } finally {
       button.disabled = false;
-      button.textContent = 'Uložiť';
+      button.textContent = 'Uložiť nastavenia';
     }
   });
 
   load().catch(error => {
     if (!['PLAN_REQUIRED', 'LOGIN_REQUIRED'].includes(error.message)) {
-      showNotice(error.message, 'error');
+      showNotice(error.message);
       $('rows').innerHTML = '<tr><td colspan="4">Načítanie zlyhalo.</td></tr>';
     }
   });
