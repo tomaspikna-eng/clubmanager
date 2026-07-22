@@ -26,9 +26,39 @@ async function settle(id){const {error}=await A.db.rpc('club_manager_settle_sess
 function showError(msg){notice.innerHTML=`<div class="notice">${msg}</div>`;setTimeout(()=>notice.innerHTML='',5000)}
 function scoreboardSport(st){const v=String(st?.sport||'').toLowerCase();if(v.includes('dart')||v.includes('šíp'))return'darts';if(v.includes('billiard')||v.includes('biliard')||v.includes('pool'))return'billiard';return'other'}
 function scoreboardDiscipline(st){const s=scoreboardSport(st);return s==='darts'?'501':s==='billiard'?'8-ball':'Univerzál'}
-function scoreboardUrl(st){const u=new URL('/scoreboard/',location.origin);u.searchParams.set('station',st.name);u.searchParams.set('sport',scoreboardSport(st));u.searchParams.set('discipline',scoreboardDiscipline(st));u.searchParams.set('players','2');u.searchParams.set('race','5');u.searchParams.set('lock','1');if(st.token)u.searchParams.set('station_token',st.token);u.searchParams.set('from',location.href);return u.toString()}
+function scoreboardUrl(st){
+  const u=new URL('/scoreboard/',location.origin);
+  u.searchParams.set('station',st.name);
+  u.searchParams.set('sport',scoreboardSport(st));
+  u.searchParams.set('discipline',scoreboardDiscipline(st));
+  u.searchParams.set('players','2');
+  u.searchParams.set('race','5');
+  u.searchParams.set('lock','1');
+  return u.toString();
+}
 function openScoreboard(id){const st=stations.find(x=>x.id===id);if(st)window.open(scoreboardUrl(st),'_blank','noopener')}
-function openQr(id){const st=stations.find(x=>x.id===id);if(!st)return;const url=scoreboardUrl(st);qrTitle.textContent=st.name;qrSubtitle.textContent=`${st.sport} · naskenuj tabletom`;qrUrl.value=url;qrOpenBtn.dataset.url=url;qrCode.innerHTML='';new QRCode(qrCode,{text:url,width:252,height:252});qrOverlay.classList.remove('hidden')}
+function openQr(id){
+  const st=stations.find(x=>x.id===id);
+  if(!st)return;
+  const url=scoreboardUrl(st);
+  qrTitle.textContent=st.name;
+  qrSubtitle.textContent=`${st.sport} · naskenuj tabletom`;
+  qrUrl.value=url;
+  qrOpenBtn.dataset.url=url;
+  qrCode.innerHTML='';
+  try{
+    new QRCode(qrCode,{
+      text:url,
+      width:252,
+      height:252,
+      correctLevel:QRCode.CorrectLevel.L
+    });
+    qrOverlay.classList.remove('hidden');
+  }catch(error){
+    console.error('[dashboard] QR generation failed:',error);
+    showError('QR kód sa nepodarilo vytvoriť. Použi tlačidlo Scoreboard.');
+  }
+}
 function closeQr(){qrOverlay.classList.add('hidden')}
 qrCloseBtn.onclick=closeQr;qrOverlay.onclick=e=>{if(e.target===qrOverlay)closeQr()};qrOpenBtn.onclick=()=>window.open(qrOpenBtn.dataset.url,'_blank','noopener');
 qrCopyBtn.onclick=async()=>{try{await navigator.clipboard.writeText(qrUrl.value)}catch{qrUrl.select();document.execCommand('copy')}showError('Link na scoreboard bol skopírovaný.')};
