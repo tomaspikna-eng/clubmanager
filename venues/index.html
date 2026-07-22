@@ -8,8 +8,16 @@
 <link rel="stylesheet" href="../assets/styles.css">
 <style>
 .section-title{margin:0 0 14px}
-.form-row{display:grid;grid-template-columns:2fr 1.2fr auto;gap:10px}
-@media(max-width:700px){.form-row{grid-template-columns:1fr}}
+.form-row{
+  display:grid;
+  grid-template-columns:1.6fr 1.2fr 1fr auto;
+  gap:10px;
+  align-items:stretch;
+}
+.save-btn{min-width:190px;font-weight:800}
+.helper{margin:0 0 14px;color:var(--muted);font-size:13px;line-height:1.5}
+@media(max-width:900px){.form-row{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.form-row{grid-template-columns:1fr}.save-btn{width:100%}}
 </style>
 </head>
 <body>
@@ -35,52 +43,38 @@
 
     <section class="content">
       <div class="page-head">
-        <h1>Športoviská a stanice</h1>
-        <p>Najprv vytvor športovisko alebo miestnosť, potom konkrétne stoly, terče či dráhy.</p>
+        <h1>Nastavenie športoviska</h1>
+        <p>Pridaj konkrétny stôl, terč alebo dráhu jedným uložením.</p>
       </div>
 
       <div id="notice"></div>
 
       <section class="panel">
         <h3 class="section-title">Nové športovisko</h3>
+        <p class="helper">
+          Internú hlavnú prevádzku systém vytvorí automaticky. Používateľ zadáva iba konkrétnu jednotku, ktorá sa zobrazí na dashboarde.
+        </p>
+
         <div class="form-row">
-          <input id="venueName" placeholder="Názov, napr. Hlavná biliardová miestnosť">
-          <input id="venueSport" placeholder="Šport, napr. Biliard">
-          <button class="primary" id="addVenueBtn">Pridať športovisko</button>
-        </div>
-      </section>
-
-      <section class="panel">
-        <h3 class="section-title">Nová stanica</h3>
-        <div class="form-grid">
-          <select id="venueSelect"></select>
           <input id="stationName" placeholder="Názov, napr. Stôl 1">
-          <input id="stationSport" placeholder="Šport, napr. Biliard">
+          <select id="stationSport">
+            <option value="">Vyber šport</option>
+            <option value="billiard">Biliard</option>
+            <option value="darts">Šípky</option>
+          </select>
           <input id="stationRate" type="number" min="0" step="0.10" placeholder="Cena / hod.">
-          <button class="primary" id="addStationBtn">Pridať stanicu</button>
+          <button class="primary save-btn" id="saveSettingsBtn">Uložiť nastavenia</button>
         </div>
       </section>
 
       <section class="panel">
-        <h3 class="section-title">Vytvorené športoviská</h3>
+        <h3 class="section-title">Uložené športoviská</h3>
         <table class="table">
           <thead>
-            <tr><th>Názov</th><th>Šport</th><th>Stav</th></tr>
-          </thead>
-          <tbody id="venueRows">
-            <tr><td colspan="3">Načítavam…</td></tr>
-          </tbody>
-        </table>
-      </section>
-
-      <section class="panel">
-        <h3 class="section-title">Vytvorené stanice</h3>
-        <table class="table">
-          <thead>
-            <tr><th>Názov</th><th>Šport</th><th>Športovisko</th><th>Cena/h</th><th>Stav</th></tr>
+            <tr><th>Názov</th><th>Šport</th><th>Cena/h</th><th>Stav</th></tr>
           </thead>
           <tbody id="stationRows">
-            <tr><td colspan="5">Načítavam…</td></tr>
+            <tr><td colspan="4">Načítavam…</td></tr>
           </tbody>
         </table>
       </section>
@@ -96,183 +90,155 @@
   'use strict';
 
   const A = window.CSPClubManager;
-  const clubNameEl = document.getElementById('clubName');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const notice = document.getElementById('notice');
-
-  const venueNameInput = document.getElementById('venueName');
-  const venueSportInput = document.getElementById('venueSport');
-  const addVenueBtn = document.getElementById('addVenueBtn');
-  const venueRows = document.getElementById('venueRows');
-
-  const venueSelect = document.getElementById('venueSelect');
-  const stationNameInput = document.getElementById('stationName');
-  const stationSportInput = document.getElementById('stationSport');
-  const stationRateInput = document.getElementById('stationRate');
-  const addStationBtn = document.getElementById('addStationBtn');
-  const stationRows = document.getElementById('stationRows');
+  const $ = id => document.getElementById(id);
 
   let ctx = null;
-  let venues = [];
   let stations = [];
 
-  logoutBtn.addEventListener('click', () => A.logout());
+  $('logoutBtn').addEventListener('click', () => A.logout());
 
   function showNotice(message) {
-    notice.innerHTML = message ? `<div class="notice">${message}</div>` : '';
+    $('notice').innerHTML = message ? `<div class="notice">${message}</div>` : '';
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, c => ({
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#039;'
+    }[c]));
+  }
+
+  function sportLabel(value) {
+    if (value === 'billiard') return 'Biliard';
+    if (value === 'darts') return 'Šípky';
+    return value || '—';
   }
 
   function render() {
-    venueSelect.innerHTML = venues.length
-      ? venues.map(v => `<option value="${v.id}">${v.name}</option>`).join('')
-      : '<option value="">Najprv vytvor športovisko</option>';
-
-    venueRows.innerHTML = venues.length
-      ? venues.map(v => `
-          <tr>
-            <td>${v.name}</td>
-            <td>${v.sport || '—'}</td>
-            <td>${v.is_active === false ? 'Neaktívne' : 'Aktívne'}</td>
-          </tr>`).join('')
-      : '<tr><td colspan="3">Zatiaľ nie je vytvorené žiadne športovisko.</td></tr>';
-
-    stationRows.innerHTML = stations.length
+    $('stationRows').innerHTML = stations.length
       ? stations.map(s => `
           <tr>
-            <td>${s.name}</td>
-            <td>${s.sport}</td>
-            <td>${s.venues?.name || '—'}</td>
-            <td>${A.money(s.base_hourly_rate)}</td>
-            <td>${s.status}</td>
-          </tr>`).join('')
-      : '<tr><td colspan="5">Zatiaľ nie sú vytvorené žiadne stanice.</td></tr>';
+            <td>${escapeHtml(s.name)}</td>
+            <td>${escapeHtml(sportLabel(s.sport))}</td>
+            <td>${A.money(s.base_hourly_rate || 0)}</td>
+            <td>${s.is_active === false ? 'Neaktívne' : 'Aktívne'}</td>
+          </tr>
+        `).join('')
+      : '<tr><td colspan="4">Zatiaľ nie je uložené žiadne športovisko.</td></tr>';
+  }
 
-    addStationBtn.disabled = venues.length === 0;
+  async function getOrCreateDefaultVenue() {
+    const existing = await A.db
+      .from('venues')
+      .select('id')
+      .eq('club_id', ctx.club.id)
+      .eq('is_active', true)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (existing.error) throw existing.error;
+    if (existing.data?.id) return existing.data.id;
+
+    const created = await A.db
+      .from('venues')
+      .insert({
+        club_id: ctx.club.id,
+        name: 'Hlavná prevádzka',
+        is_active: true
+      })
+      .select('id')
+      .single();
+
+    if (created.error) throw created.error;
+    return created.data.id;
   }
 
   async function load() {
     ctx = await A.requireAccess();
-    clubNameEl.textContent = ctx.club?.name || 'Klub';
+    $('clubName').textContent = ctx.club?.name || 'Klub';
 
-    if (!ctx.club) {
-      throw new Error('Klub neexistuje.');
-    }
+    if (!ctx.club) throw new Error('Klub neexistuje.');
 
-    const [venueResult, stationResult] = await Promise.all([
-      A.db.from('venues')
-        .select('*')
-        .eq('club_id', ctx.club.id)
-        .order('name'),
-      A.db.from('stations')
-        .select('*,venues(name)')
-        .eq('club_id', ctx.club.id)
-        .order('sort_order')
-    ]);
+    const result = await A.db
+      .from('stations')
+      .select('*')
+      .eq('club_id', ctx.club.id)
+      .order('sort_order');
 
-    if (venueResult.error || stationResult.error) {
-      throw venueResult.error || stationResult.error;
-    }
+    if (result.error) throw result.error;
 
-    venues = venueResult.data || [];
-    stations = stationResult.data || [];
+    stations = result.data || [];
     render();
   }
 
-  addVenueBtn.addEventListener('click', async () => {
+  $('saveSettingsBtn').addEventListener('click', async () => {
     showNotice('');
 
-    const venueName = venueNameInput.value.trim();
-    const venueSport = venueSportInput.value.trim();
+    const name = $('stationName').value.trim();
+    const sport = $('stationSport').value;
+    const hourlyRate = Number($('stationRate').value || 0);
 
-    if (!venueName) {
+    if (!name) {
       showNotice('Zadaj názov športoviska.');
-      venueNameInput.focus();
+      $('stationName').focus();
       return;
     }
 
-    addVenueBtn.disabled = true;
-    addVenueBtn.textContent = 'Ukladám…';
+    if (!sport) {
+      showNotice('Vyber šport.');
+      $('stationSport').focus();
+      return;
+    }
+
+    if (!Number.isFinite(hourlyRate) || hourlyRate < 0) {
+      showNotice('Zadaj platnú cenu za hodinu.');
+      $('stationRate').focus();
+      return;
+    }
+
+    const button = $('saveSettingsBtn');
+    button.disabled = true;
+    button.textContent = 'Ukladám…';
 
     try {
-      const { error } = await A.db.from('venues').insert({
-        club_id: ctx.club.id,
-        name: venueName,
-        sport: venueSport || null,
-        is_active: true
-      });
+      const venueId = await getOrCreateDefaultVenue();
 
-      if (error) throw error;
+      const result = await A.db
+        .from('stations')
+        .insert({
+          club_id: ctx.club.id,
+          venue_id: venueId,
+          name,
+          sport,
+          base_hourly_rate: hourlyRate,
+          status: 'idle',
+          is_active: true
+        });
 
-      venueNameInput.value = '';
-      venueSportInput.value = '';
+      if (result.error) throw result.error;
 
-      await load();
-      showNotice('Športovisko bolo uložené.');
-    } catch (error) {
-      showNotice(error?.message || 'Športovisko sa nepodarilo uložiť.');
-    } finally {
-      addVenueBtn.disabled = false;
-      addVenueBtn.textContent = 'Pridať športovisko';
-    }
-  });
-
-  addStationBtn.addEventListener('click', async () => {
-    showNotice('');
-
-    const stationName = stationNameInput.value.trim();
-    const stationSport = stationSportInput.value.trim();
-    const hourlyRate = Number(stationRateInput.value || 0);
-
-    if (!venueSelect.value) {
-      showNotice('Najprv vytvor športovisko.');
-      return;
-    }
-    if (!stationName) {
-      showNotice('Zadaj názov stanice.');
-      stationNameInput.focus();
-      return;
-    }
-    if (!stationSport) {
-      showNotice('Zadaj šport.');
-      stationSportInput.focus();
-      return;
-    }
-
-    addStationBtn.disabled = true;
-    addStationBtn.textContent = 'Ukladám…';
-
-    try {
-      const { error } = await A.db.from('stations').insert({
-        club_id: ctx.club.id,
-        venue_id: venueSelect.value,
-        name: stationName,
-        sport: stationSport,
-        base_hourly_rate: hourlyRate,
-        status: 'idle',
-        is_active: true
-      });
-
-      if (error) throw error;
-
-      stationNameInput.value = '';
-      stationSportInput.value = '';
-      stationRateInput.value = '';
+      $('stationName').value = '';
+      $('stationSport').value = '';
+      $('stationRate').value = '';
 
       await load();
-      showNotice('Stanica bola uložená.');
+      showNotice('Nastavenia boli uložené. Športovisko je pripravené na dashboarde.');
     } catch (error) {
-      showNotice(error?.message || 'Stanica sa nepodarila uložiť.');
+      showNotice(error?.message || 'Nastavenia sa nepodarilo uložiť.');
     } finally {
-      addStationBtn.disabled = false;
-      addStationBtn.textContent = 'Pridať stanicu';
+      button.disabled = false;
+      button.textContent = 'Uložiť nastavenia';
     }
   });
 
   load().catch(error => {
     if (!['PLAN_REQUIRED', 'LOGIN_REQUIRED'].includes(error.message)) {
       showNotice(error.message);
-      venueRows.innerHTML = '<tr><td colspan="3">Načítanie zlyhalo.</td></tr>';
-      stationRows.innerHTML = '<tr><td colspan="5">Načítanie zlyhalo.</td></tr>';
+      $('stationRows').innerHTML = '<tr><td colspan="4">Načítanie zlyhalo.</td></tr>';
     }
   });
 })();
