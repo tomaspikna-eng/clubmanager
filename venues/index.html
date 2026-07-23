@@ -113,6 +113,24 @@
         <div id="venueRows"><div class="empty">Načítavam…</div></div>
       </section>
 
+
+      <section class="panel">
+        <h3 class="section-title">Cenové profily zákazníkov</h3>
+        <p class="helper">Samostatné úrovne zákazníkov používané v Live prevádzke. Zadaj priamo percentuálnu zľavu. Napr. 20 = zákazník platí o 20 % menej.</p>
+        <div class="station-form" style="grid-template-columns:1.2fr .8fr .8fr auto">
+          <div class="field"><label>Názov profilu</label><input id="profileName" placeholder="Napr. Permanentka"></div>
+          <div class="field"><label>Zľava %</label><input id="profileDiscount" type="number" min="0" max="100" step="1" value="0"></div>
+          <div class="field"><label>Poradie</label><input id="profileOrder" type="number" min="0" step="1" value="0"></div>
+          <button class="primary" id="addProfileBtn">Pridať profil</button>
+        </div>
+        <div class="table-wrap" style="margin-top:16px">
+          <table class="table">
+            <thead><tr><th>Názov</th><th>Kód</th><th>Zľava %</th><th>Účtovaná cena</th><th>Aktívny</th><th>Poradie</th><th>Akcie</th></tr></thead>
+            <tbody id="profileRows"><tr><td colspan="7">Načítavam…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
       <section class="panel">
         <h3 class="section-title">Nová stanica</h3>
         <p class="helper">Stanica je konkrétny stôl, sisalový terč, scoreboard alebo iná ovládaná jednotka.</p>
@@ -211,8 +229,10 @@
   let ctx = null;
   let venues = [];
   let stations = [];
+  let customerProfiles = [];
   let editingVenueId = null;
   let editingStationId = null;
+  let editingProfileId = null;
 
   $('logoutBtn').addEventListener('click', () => A.logout());
 
@@ -282,6 +302,54 @@
 
   function closeQrModal() {
     $('qrOverlay').classList.add('hidden');
+  }
+
+
+  function slugifyProfileCode(value) {
+    return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0,40) || `profil_${Date.now()}`;
+  }
+
+  function discountLabel(multiplier) {
+    const m = Number(multiplier ?? 1);
+    const pct = Math.round((1 - m) * 100);
+    if (pct > 0) return `${pct} %`;
+    if (pct < 0) return `+${Math.abs(pct)} %`;
+    return '0 %';
+  }
+
+  function multiplierToDiscount(multiplier) {
+    const m = Number(multiplier ?? 1);
+    return Math.max(0, Math.min(100, Math.round((1 - m) * 100)));
+  }
+
+  function discountToMultiplier(discount) {
+    const d = Math.max(0, Math.min(100, Number(discount || 0)));
+    return Number((1 - d / 100).toFixed(4));
+  }
+
+  function renderCustomerProfiles() {
+    $('profileRows').innerHTML = customerProfiles.length ? customerProfiles.map(p => {
+      const editing = editingProfileId === p.id;
+      if (editing) {
+        return `<tr>
+          <td><input class="inline-input" id="editProfileName-${p.id}" value="${escapeHtml(p.name)}"></td>
+          <td><span class="mono">${escapeHtml(p.code)}</span></td>
+          <td><input class="inline-input" id="editProfileDiscount-${p.id}" type="number" min="0" max="100" step="1" value="${multiplierToDiscount(p.rate_multiplier)}"></td>
+          <td>${Math.round(Number(p.rate_multiplier ?? 1) * 100)} %</td>
+          <td><select class="inline-select" id="editProfileActive-${p.id}"><option value="true" ${p.is_active !== false ? 'selected' : ''}>Áno</option><option value="false" ${p.is_active === false ? 'selected' : ''}>Nie</option></select></td>
+          <td><input class="inline-input" id="editProfileOrder-${p.id}" type="number" min="0" step="1" value="${Number(p.sort_order || 0)}"></td>
+          <td><div class="actions"><button class="primary btn-sm" data-save-profile="${p.id}">Uložiť</button><button class="ghost btn-sm" data-cancel-profile="${p.id}">Zrušiť</button></div></td>
+        </tr>`;
+      }
+      return `<tr>
+        <td><strong>${escapeHtml(p.name)}</strong></td><td><span class="mono">${escapeHtml(p.code)}</span></td>
+        <td>${multiplierToDiscount(p.rate_multiplier)} %</td><td>${Math.round(Number(p.rate_multiplier ?? 1) * 100)} %</td>
+        <td class="${p.is_active === false ? 'status-inactive' : 'status-active'}">${p.is_active === false ? 'Nie' : 'Áno'}</td>
+        <td>${Number(p.sort_order || 0)}</td>
+        <td><div class="actions"><button class="warning btn-sm" data-edit-profile="${p.id}">Upraviť</button><button class="danger btn-sm" data-delete-profile="${p.id}">Zmazať</button></div></td>
+      </tr>`;
+    }).join('') : '<tr><td colspan="7">Zatiaľ nie je vytvorený žiadny cenový profil.</td></tr>';
   }
 
   function renderVenueSelect(selectedId = '') {
@@ -397,6 +465,7 @@
   function renderAll() {
     renderVenues();
     renderStations();
+    renderCustomerProfiles();
   }
 
   async function load() {
@@ -405,16 +474,19 @@
 
     if (!ctx.club) throw new Error('Klub neexistuje.');
 
-    const [venueResult, stationResult] = await Promise.all([
+    const [venueResult, stationResult, profileResult] = await Promise.all([
       A.db.from('venues').select('*').eq('club_id', ctx.club.id).order('created_at'),
-      A.db.from('stations').select('*').eq('club_id', ctx.club.id).order('sort_order').order('created_at')
+      A.db.from('stations').select('*').eq('club_id', ctx.club.id).order('sort_order').order('created_at'),
+      A.db.from('club_manager_price_profiles').select('*').eq('club_id', ctx.club.id).order('sort_order').order('created_at')
     ]);
 
     if (venueResult.error) throw venueResult.error;
     if (stationResult.error) throw stationResult.error;
+    if (profileResult.error) throw profileResult.error;
 
     venues = venueResult.data || [];
     stations = stationResult.data || [];
+    customerProfiles = profileResult.data || [];
     renderAll();
   }
 
@@ -475,6 +547,64 @@
     } finally {
       button.disabled = false;
       button.textContent = 'Pridať prevádzku';
+    }
+  });
+
+
+  $('addProfileBtn').addEventListener('click', async () => {
+    showNotice('');
+    const name = $('profileName').value.trim();
+    const discount = Number($('profileDiscount').value);
+    const multiplier = discountToMultiplier(discount);
+    const sortOrder = Number($('profileOrder').value || 0);
+    if (!name) return showNotice('Zadaj názov cenového profilu.', true);
+    if (!Number.isFinite(discount) || discount < 0 || discount > 100) return showNotice('Zľava musí byť od 0 do 100 %.', true);
+    if (!Number.isInteger(sortOrder) || sortOrder < 0) return showNotice('Poradie musí byť celé nezáporné číslo.', true);
+
+    let code = slugifyProfileCode(name);
+    if (customerProfiles.some(p => p.code === code)) code = `${code}_${Date.now().toString().slice(-5)}`;
+
+    try {
+      const { error } = await A.db.from('club_manager_price_profiles').insert({
+        club_id: ctx.club.id, code, name, rate_multiplier: multiplier, is_active: true, sort_order: sortOrder
+      });
+      if (error) throw error;
+      $('profileName').value = ''; $('profileDiscount').value = '0'; $('profileOrder').value = '0';
+      await load(); showNotice('Cenový profil bol vytvorený.');
+    } catch (error) { showNotice(error?.message || 'Cenový profil sa nepodarilo vytvoriť.', true); }
+  });
+
+  $('profileRows').addEventListener('click', async event => {
+    const editId = event.target.dataset.editProfile;
+    const cancelId = event.target.dataset.cancelProfile;
+    const saveId = event.target.dataset.saveProfile;
+    const deleteId = event.target.dataset.deleteProfile;
+
+    if (editId) { editingProfileId = editId; renderCustomerProfiles(); return; }
+    if (cancelId) { editingProfileId = null; renderCustomerProfiles(); return; }
+
+    if (saveId) {
+      const name = $(`editProfileName-${saveId}`).value.trim();
+      const discount = Number($(`editProfileDiscount-${saveId}`).value);
+      const multiplier = discountToMultiplier(discount);
+      const isActive = $(`editProfileActive-${saveId}`).value === 'true';
+      const sortOrder = Number($(`editProfileOrder-${saveId}`).value || 0);
+      if (!name) return showNotice('Názov cenového profilu nemôže byť prázdny.', true);
+      if (!Number.isFinite(discount) || discount < 0 || discount > 100) return showNotice('Zľava musí byť od 0 do 100 %.', true);
+
+      const { error } = await A.db.from('club_manager_price_profiles').update({
+        name, rate_multiplier: multiplier, is_active: isActive, sort_order: sortOrder
+      }).eq('id', saveId).eq('club_id', ctx.club.id);
+      if (error) return showNotice(error.message, true);
+      editingProfileId = null; await load(); showNotice('Cenový profil bol upravený.'); return;
+    }
+
+    if (deleteId) {
+      const profile = customerProfiles.find(p => p.id === deleteId);
+      if (!profile || !window.confirm(`Naozaj chceš natrvalo zmazať cenový profil „${profile.name}“?`)) return;
+      const { error } = await A.db.from('club_manager_price_profiles').delete().eq('id', deleteId).eq('club_id', ctx.club.id);
+      if (error) return showNotice(error.message, true);
+      await load(); showNotice('Cenový profil bol zmazaný.');
     }
   });
 
