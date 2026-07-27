@@ -26,16 +26,11 @@ async function settle(id){const {error}=await A.db.rpc('club_manager_settle_sess
 function escHtml(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function showError(msg){notice.innerHTML=`<div class="notice">${escHtml(msg)}</div>`;setTimeout(()=>notice.innerHTML='',5000)}
 function scoreboardSport(st){const v=String(st?.sport||'').toLowerCase();if(v.includes('dart')||v.includes('šíp'))return'darts';if(v.includes('billiard')||v.includes('biliard')||v.includes('pool'))return'billiard';return'other'}
-function scoreboardDiscipline(st){const s=scoreboardSport(st);return s==='darts'?'501':s==='billiard'?'8-ball':'Univerzál'}
 function scoreboardUrl(st){
   const u=new URL('https://connectsportspro.com/scoreboard/');
   u.searchParams.set('station',st.name);
   u.searchParams.set('station_id',st.id);
   u.searchParams.set('sport',scoreboardSport(st));
-  u.searchParams.set('discipline',scoreboardDiscipline(st));
-  u.searchParams.set('players','2');
-  u.searchParams.set('race','5');
-  u.searchParams.set('lock','1');
   u.searchParams.set('from', location.origin + '/dashboard/');
   return u.toString();
 }
