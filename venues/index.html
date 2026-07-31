@@ -815,17 +815,20 @@
       const station = stations.find(s => s.id === deleteId);
       if (!station) return;
 
-      if (!window.confirm(`Naozaj chceš natrvalo zmazať stanicu „${station.name}“?`)) return;
+      if (!window.confirm(`Odstrániť stanicu „${station.name}“ z aktívnej prevádzky? Historické rezervácie a relácie zostanú zachované.`)) return;
 
       const result = await A.db.from('stations')
-        .delete()
+        .update({
+          is_active: false,
+          status: 'maintenance'
+        })
         .eq('id', deleteId)
         .eq('club_id', ctx.club.id);
 
       if (result.error) return showNotice(result.error.message, true);
 
       await load();
-      showNotice('Stanica bola zmazaná.');
+      showNotice('Stanica bola odstránená z aktívnej prevádzky. Historické dáta zostali zachované.');
     }
   });
 
