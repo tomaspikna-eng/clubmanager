@@ -1,705 +1,159 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="sk">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Rezervácie – Connect Sports Pro</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<title>Kalendár — CSP Club Manager</title>
+<link rel="stylesheet" href="../assets/styles.css">
 <style>
-:root{
-  --bg:#050608;
-  --panel:#0d1015;
-  --panel-2:#12161d;
-  --panel-3:#181d26;
-  --line:rgba(255,255,255,.09);
-  --text:#f5f6f8;
-  --muted:#8d95a1;
-  --gold:#d4a843;
-  --gold-soft:rgba(212,168,67,.14);
-  --green:#27c978;
-  --green-dark:#1da25f;
-  --red:#d6535d;
-  --red-dark:#ad3f48;
-}
-*{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}
-button,input,select,textarea{font:inherit}
-button{cursor:pointer}
-a{color:inherit;text-decoration:none}
-.shell{width:min(1280px,calc(100% - 24px));margin:auto}
-.header{
-  min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:16px;
-  border-bottom:1px solid var(--line)
-}
-.brand{font-weight:900;letter-spacing:-.02em;font-size:1.05rem}
-.brand .gold{color:var(--gold)}
-.header-right{display:flex;align-items:center;gap:10px}
-.mode-badge{
-  padding:7px 10px;border-radius:999px;background:var(--gold-soft);color:var(--gold);
-  font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em
-}
-.main{padding:28px 0 48px}
-.top{
-  display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap;margin-bottom:18px
-}
-.title h1{margin:0 0 7px;font-size:clamp(2rem,4vw,3.6rem);letter-spacing:-.05em}
-.title p{margin:0;color:var(--muted)}
-.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.btn,.input{
-  min-height:42px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2);
-  color:var(--text);padding:0 13px;font-weight:800
-}
-.btn:hover{border-color:rgba(212,168,67,.42)}
-.btn.gold{background:var(--gold);color:#171005;border-color:transparent}
-.btn.green{background:var(--green);color:#062216;border-color:transparent}
-.btn.red{background:rgba(214,83,93,.12);color:#ff9aa2;border-color:rgba(214,83,93,.32)}
-.panel{
-  background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;
-  box-shadow:0 16px 50px rgba(0,0,0,.22)
-}
-.toolbar{
-  display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px
-}
-.toolbar-left,.toolbar-right{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
-.label{font-size:.78rem;font-weight:800;color:#d7dbe1}
-.select{min-width:220px}
-.week-label{font-weight:900;color:var(--gold)}
-.calendar-wrap{overflow:auto;border:1px solid var(--line);border-radius:13px}
-.calendar{
-  width:100%;min-width:980px;border-collapse:separate;border-spacing:0;table-layout:fixed;background:#0a0d12
-}
-.calendar th,.calendar td{
-  border-right:1px solid var(--line);border-bottom:1px solid var(--line)
-}
-.calendar th:last-child,.calendar td:last-child{border-right:none}
-.calendar tr:last-child td{border-bottom:none}
-.calendar thead th{
-  position:sticky;top:0;z-index:4;background:var(--panel-3);padding:12px 7px;text-align:center;
-  font-size:.78rem;color:#d9dde3
-}
-.calendar thead th:first-child{left:0;z-index:6}
-.day-name{display:block;font-weight:900}
-.day-date{display:block;color:var(--muted);margin-top:3px;font-size:.72rem}
-.time-cell{
-  width:118px;position:sticky;left:0;z-index:3;background:var(--panel-2);padding:0 8px;
-  text-align:center;font-weight:800;font-size:.76rem
-}
-.slot{
-  height:56px;text-align:center;vertical-align:middle;font-size:.76rem;font-weight:900;
-  transition:.14s;user-select:none
-}
-.slot.free{background:var(--green);color:#052115}
-.slot.free:hover{background:var(--green-dark)}
-.slot.busy{background:var(--red);color:#fff}
-.slot.busy:hover{background:var(--red-dark)}
-.slot.closed{background:#20252e;color:#68717d;cursor:not-allowed}
-.slot.admin-busy{font-size:.7rem;line-height:1.2}
-.slot.admin-busy b{display:block;font-size:.76rem}
-.legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;font-size:.8rem;color:var(--muted)}
-.legend span{display:flex;gap:7px;align-items:center}
-.swatch{width:15px;height:15px;border-radius:4px}
-.swatch.green{background:var(--green)}
-.swatch.red{background:var(--red)}
-.swatch.closed{background:#20252e}
-.notice{margin-top:12px;padding:11px 13px;border-radius:10px;border:1px solid var(--line);color:var(--muted);font-size:.84rem}
-.notice.error{color:#ff9da4;border-color:rgba(214,83,93,.34);background:rgba(214,83,93,.08)}
-.notice.ok{color:var(--green);border-color:rgba(39,201,120,.34);background:rgba(39,201,120,.08)}
-.hidden{display:none!important}
-.modal{
-  position:fixed;inset:0;background:rgba(0,0,0,.76);display:grid;place-items:center;padding:18px;z-index:100
-}
-.modal-card{
-  width:min(620px,100%);max-height:92vh;overflow:auto;background:var(--panel-2);
-  border:1px solid var(--line);border-radius:18px;padding:20px
-}
-.modal-head{display:flex;justify-content:space-between;align-items:center;gap:14px}
-.modal-head h2{margin:0}
-.close{width:38px;height:38px;border-radius:9px;border:1px solid var(--line);background:var(--panel-3);color:#fff}
-.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:16px 0}
-.summary div{background:#0b0e13;border:1px solid var(--line);border-radius:11px;padding:12px}
-.summary small{display:block;color:var(--muted);margin-bottom:4px}
-.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.field{display:grid;gap:6px}
-.field.full{grid-column:1/-1}
-.field label{font-size:.8rem;font-weight:800;color:#d7dbe1}
-.textarea{min-height:90px;padding-top:10px}
-.actions{display:flex;gap:9px;flex-wrap:wrap}
-@media(max-width:720px){
-  .shell{width:min(100% - 12px,1280px)}
-  .main{padding-top:18px}
-  .panel{padding:9px}
-  .form,.summary{grid-template-columns:1fr}
-  .field.full{grid-column:auto}
-  .calendar{min-width:840px}
-  .slot{height:52px}
-}
+:root{--hour-width:118px;--row-height:78px;--start-hour:8;--end-hour:24;--free:#163d28;--free-border:#267c4c;--busy:#5b1717;--busy-border:#cf4c4c;--event:#6d42a8}
+.calendar-toolbar,.modebar,.filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:13px}
+.grow{flex:1}.date-title{font-weight:900;font-size:18px;min-width:230px;text-align:center}
+.view-btn,.mode-btn,.filter-btn{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:9px;padding:9px 12px;font-weight:800;cursor:pointer}
+.view-btn.active,.mode-btn.active,.filter-btn.active{background:var(--gold-dim);color:var(--gold);border-color:rgba(212,168,67,.42)}
+.mode-help{color:var(--muted);font-size:12px}
+.calendar-shell{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.calendar-scroll{overflow:auto;max-height:calc(100vh - 300px)}
+.day-grid{min-width:calc(180px + 16 * var(--hour-width))}
+.day-head{display:grid;grid-template-columns:180px repeat(16,var(--hour-width));position:sticky;top:0;z-index:30;background:var(--card);border-bottom:1px solid var(--line)}
+.corner{position:sticky;left:0;z-index:32;background:var(--card);padding:13px;border-right:1px solid var(--line);font-weight:800}
+.hour{padding:13px 0;text-align:center;color:var(--muted);font:700 12px var(--mono);border-right:1px solid var(--line)}
+.event-strip{display:grid;grid-template-columns:180px 1fr;min-height:58px;border-bottom:1px solid var(--line)}
+.event-strip-label{position:sticky;left:0;z-index:20;background:var(--card);padding:12px;border-right:1px solid var(--line);font-weight:800}
+.event-track{position:relative;background:rgba(177,120,255,.04)}
+.event-block{position:absolute;top:7px;height:44px;border-radius:9px;padding:7px 9px;background:rgba(177,120,255,.22);border:1px solid rgba(177,120,255,.58);cursor:pointer;overflow:hidden}
+.event-block strong,.slot-block strong{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.event-block small,.slot-block small{display:block;font:700 10px var(--mono);margin-top:3px;opacity:.85}
+.station-row{display:grid;grid-template-columns:180px 1fr;min-height:var(--row-height);border-bottom:1px solid var(--line)}
+.station-label{position:sticky;left:0;z-index:20;background:var(--card);border-right:1px solid var(--line);padding:13px;display:flex;flex-direction:column;justify-content:center}
+.station-label b{font-size:14px}.station-label span{font-size:11px;color:var(--muted);margin-top:3px}
+.timeline{position:relative;min-height:var(--row-height);cursor:pointer;background:
+linear-gradient(rgba(22,61,40,.92),rgba(22,61,40,.92)),
+repeating-linear-gradient(to right,transparent 0,transparent calc(var(--hour-width)/2 - 1px),rgba(255,255,255,.05) calc(var(--hour-width)/2 - 1px),rgba(255,255,255,.05) calc(var(--hour-width)/2)),
+repeating-linear-gradient(to right,transparent 0,transparent calc(var(--hour-width) - 1px),rgba(255,255,255,.11) calc(var(--hour-width) - 1px),rgba(255,255,255,.11) var(--hour-width));
+box-shadow:inset 0 0 0 1px rgba(38,124,76,.2)}
+.timeline:hover{filter:brightness(1.08)}
+.slot-block{position:absolute;top:7px;height:calc(var(--row-height) - 14px);border-radius:9px;padding:7px 9px;overflow:hidden;cursor:pointer;background:linear-gradient(135deg,rgba(113,20,20,.98),rgba(79,17,17,.96));border:1px solid var(--busy-border);z-index:5}
+.slot-block.tournament{background:linear-gradient(135deg,#7d1717,#4d1010);border:2px solid #ff6868}
+.slot-block.pending{background:linear-gradient(135deg,#75351a,#4a2414);border-color:#e79551}
+.slot-block.checked_in{background:linear-gradient(135deg,#155339,#103b2a);border-color:#38d58b}
+.slot-type{font-size:9px;font-weight:900;letter-spacing:.07em;text-transform:uppercase}
+.free-label{position:absolute;left:10px;top:28px;color:#7bd49e;font-size:11px;font-weight:800;pointer-events:none}
+.now-line{position:absolute;top:0;bottom:0;width:2px;background:#fff;z-index:8;pointer-events:none}.now-line::before{content:'';position:absolute;top:0;left:-4px;width:10px;height:10px;border-radius:50%;background:#fff}
+.month-grid{display:grid;grid-template-columns:repeat(7,1fr);min-width:900px}.month-head{padding:10px;text-align:center;color:var(--muted);font-weight:800;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.month-day{min-height:130px;padding:8px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);cursor:pointer}.month-day.out{opacity:.35}.day-num{font:800 12px var(--mono);margin-bottom:6px}.chip{padding:5px 6px;border-radius:6px;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;background:#5b1717;border:1px solid #b63b3b}.chip.event{background:rgba(177,120,255,.18);border-color:rgba(177,120,255,.5)}
+.year-grid{display:grid;grid-template-columns:repeat(3,minmax(260px,1fr));gap:12px;padding:12px}.year-month{border:1px solid var(--line);border-radius:11px;padding:10px;background:var(--bg-soft)}.year-month h3{margin:0 0 8px}.mini-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}.mini-head{text-align:center;color:var(--muted);font-size:9px}.mini-day{aspect-ratio:1;display:grid;place-items:center;font-size:9px;border-radius:4px;cursor:pointer}.mini-day.busy{background:#5b1717}.mini-day.event{outline:1px solid #b178ff}.mini-day.out{opacity:.2}
+.week-grid{display:grid;grid-template-columns:80px repeat(7,minmax(150px,1fr));min-width:1130px}.week-head{position:sticky;top:0;z-index:20;background:var(--card);padding:11px;border:1px solid var(--line);text-align:center;font-weight:800}.week-time{padding:6px;color:var(--muted);font:700 11px var(--mono);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}.week-cell{min-height:58px;padding:4px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--free);cursor:pointer}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.76);display:grid;place-items:center;padding:18px;z-index:3000}.hidden{display:none!important}.modal-card{width:min(720px,100%);max-height:90vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}.modal-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}.modal-head h3{margin:0}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.form-grid label{display:grid;gap:6px;color:var(--muted);font-size:12px;font-weight:700}.form-grid input,.form-grid select,.form-grid textarea{width:100%;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:10px 12px}.wide{grid-column:1/-1}.modal-actions{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:18px}.right{display:flex;gap:8px;flex-wrap:wrap}.danger{background:var(--red);color:#fff;border:0;border-radius:9px;padding:10px 14px;font-weight:800}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;color:var(--muted);font-size:12px}.legend span::before{content:'';display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}.legend .free::before{background:var(--free-border)}.legend .busy::before{background:#b63b3b}.legend .event::before{background:#b178ff}.legend .check::before{background:#38d58b}
+@media(max-width:900px){.year-grid{grid-template-columns:1fr 1fr}}@media(max-width:650px){.year-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.wide{grid-column:auto}.date-title{width:100%;min-width:0}}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/assets/csp-auth.js"></script>
 </head>
 <body>
-<header class="shell header">
-  <a href="/" class="brand"><span class="gold">Connect</span> Sports <span class="gold">Pro</span></a>
-  <div class="header-right">
-    <span class="mode-badge" id="modeBadge">Verejné rezervácie</span>
-  </div>
-</header>
+<div class="app">
+<aside class="sidebar"><div class="brand"><div class="brand-mark">C</div><div><div class="brand-name"><span>Connect</span>Sports<span>Pro</span></div><div class="brand-sub">Club Manager</div></div></div><a class="nav-link" href="../dashboard/">📊 Dashboard</a><a class="nav-link active" href="../reservations/">📅 Kalendár</a><a class="nav-link" href="../venues/">🎱 Športoviská</a></aside>
+<main class="main"><header class="topbar"><div><strong id="clubName">Club Manager</strong> · Kalendár</div><button class="ghost" id="logout">Odhlásiť</button></header>
+<section class="content"><div class="page-head"><h1>Klubový kalendár</h1><p>Zelená znamená voľné. Kliknutím na voľný čas vytvoríš rezerváciu. Červená znamená obsadené.</p></div><div id="notice"></div>
+<div class="calendar-toolbar"><div><button class="view-btn active" data-view="day">Deň</button><button class="view-btn" data-view="week">Týždeň</button><button class="view-btn" data-view="month">Mesiac</button><button class="view-btn" data-view="year">Rok</button></div><div class="grow"></div><button class="ghost" id="prev">←</button><button class="ghost" id="today">Dnes</button><button class="ghost" id="next">→</button><input id="datePicker" type="date"><div class="date-title" id="dateTitle"></div></div>
+<div class="modebar"><button class="mode-btn active" data-mode="reservation">Kliknutie = rezervácia zákazníka</button><button class="mode-btn" data-mode="tournament">Organizátor: označiť turnajový stôl</button><span class="mode-help" id="modeHelp">Klikni na zelený čas, vyplň údaje a po potvrdení sa zmení na červený.</span></div>
+<div class="filters"><button class="filter-btn active" data-filter="all">Všetko</button><button class="filter-btn" data-filter="reservations">Rezervácie</button><button class="filter-btn" data-filter="events">Turnaje</button></div>
+<div class="calendar-shell"><div class="calendar-scroll"><div id="calendarGrid"></div></div></div>
+<div class="legend"><span class="free">Voľné</span><span class="busy">Obsadené / turnajový stôl</span><span class="check">Check-in</span><span class="event">Turnajová udalosť</span></div>
+</section></main></div>
 
-<main class="shell main">
-  <section class="top">
-    <div class="title">
-      <h1 id="pageTitle">Rezervácie</h1>
-      <p id="pageSubtitle">Zelené pole je voľné. Červené pole je obsadené.</p>
-    </div>
-    <div class="controls">
-      <button class="btn" id="prevWeek">← 7 dní</button>
-      <input class="input" type="date" id="weekStart">
-      <button class="btn" id="todayBtn">Dnes</button>
-      <button class="btn" id="nextWeek">7 dní →</button>
-    </div>
-  </section>
+<div class="modal-backdrop hidden" id="reservationModal"><div class="modal-card"><div class="modal-head"><h3 id="reservationTitle">Rezervácia</h3><button class="ghost" data-close="reservationModal">✕</button></div><div class="form-grid">
+<label>Stanica<select id="rStation"></select></label><label>Stav<select id="rStatus"><option value="confirmed">Potvrdená</option><option value="pending">Čaká na potvrdenie</option></select></label><label>Meno<input id="rName"></label><label>Telefón<input id="rPhone"></label><label>E-mail<input id="rEmail" type="email"></label><label>Počet osôb<input id="rParty" type="number" min="1" value="2"></label><label>Začiatok<input id="rStarts" type="datetime-local"></label><label>Koniec<input id="rEnds" type="datetime-local"></label><label class="wide">Poznámka<textarea id="rNote" rows="3"></textarea></label>
+</div><div class="modal-actions"><button class="danger hidden" id="rCancel">Zrušiť</button><div class="right"><button class="ghost hidden" id="rStart">Check-in a štart</button><button class="primary" id="rSave">Potvrdiť rezerváciu</button></div></div></div></div>
 
-  <section class="panel">
+<div class="modal-backdrop hidden" id="blockModal"><div class="modal-card"><div class="modal-head"><h3>Turnajový stôl</h3><button class="ghost" data-close="blockModal">✕</button></div><div class="form-grid">
+<label>Stanica<select id="bStation"></select></label><label>Turnajová udalosť<select id="bEvent"><option value="">Bez väzby</option></select></label><label class="wide">Označenie<input id="bLabel" placeholder="Semifinále / Finále / SF1"></label><label>Začiatok<input id="bStarts" type="datetime-local"></label><label>Koniec<input id="bEnds" type="datetime-local"></label>
+</div><div class="modal-actions"><button class="danger hidden" id="bDelete">Odstrániť označenie</button><div class="right"><button class="primary" id="bSave">Označiť stôl červenou</button></div></div></div></div>
 
-    <div class="toolbar">
-      <div class="toolbar-left">
-        <span class="label">Zariadenie</span>
-        <select class="input select" id="stationSelect"></select>
-      </div>
-      <div class="toolbar-right">
-        <span class="week-label" id="weekLabel"></span>
-        <button class="btn gold hidden" id="adminNewBtn">+ Nová rezervácia</button>
-      </div>
-    </div>
+<div class="modal-backdrop hidden" id="eventModal"><div class="modal-card"><div class="modal-head"><h3 id="eTitle">Turnaj</h3><button class="ghost" data-close="eventModal">✕</button></div><p id="eText"></p><div class="right"><a class="primary" id="eOpen" target="_blank" rel="noopener">Otvoriť udalosť</a></div></div></div>
 
-    <div class="calendar-wrap">
-      <table class="calendar">
-        <thead>
-          <tr id="calendarHead"><th class="time-cell">Čas</th></tr>
-        </thead>
-        <tbody id="calendarBody"></tbody>
-      </table>
-    </div>
-
-    <div class="legend">
-      <span><i class="swatch green"></i> Voľné</span>
-      <span><i class="swatch red"></i> Obsadené</span>
-      <span><i class="swatch closed"></i> Zatvorené</span>
-    </div>
-
-    <div id="notice" class="notice hidden"></div>
-  </section>
-</main>
-
-<div id="reservationModal" class="modal hidden">
-  <div class="modal-card">
-    <div class="modal-head">
-      <h2 id="modalTitle">Rezervovať termín</h2>
-      <button class="close" id="closeModal">×</button>
-    </div>
-
-    <div class="summary">
-      <div><small>Zariadenie</small><b id="summaryStation">–</b></div>
-      <div><small>Začiatok</small><b id="summaryStart">–</b></div>
-      <div><small>Koniec</small><b id="summaryEnd">–</b></div>
-    </div>
-
-    <form class="form" id="reservationForm">
-      <input type="hidden" name="reservation_id">
-
-      <div class="field full">
-        <label>Počet hodín</label>
-        <select class="input" name="duration_hours" id="durationHours"></select>
-      </div>
-
-      <div class="field full">
-        <label>Meno zákazníka</label>
-        <input class="input" name="customer_name" required minlength="2">
-      </div>
-
-      <div class="field">
-        <label>Telefón</label>
-        <input class="input" name="customer_phone">
-      </div>
-
-      <div class="field">
-        <label>E-mail</label>
-        <input class="input" type="email" name="customer_email">
-      </div>
-
-      <div class="field">
-        <label>Počet osôb</label>
-        <input class="input" type="number" min="1" name="party_size" value="2">
-      </div>
-
-      <div class="field admin-only hidden">
-        <label>Stav</label>
-        <select class="input" name="status">
-          <option value="pending">Čaká</option>
-          <option value="confirmed">Potvrdená</option>
-          <option value="checked_in">Check-in</option>
-          <option value="completed">Dokončená</option>
-          <option value="cancelled">Zrušená</option>
-          <option value="no_show">No-show</option>
-        </select>
-      </div>
-
-      <div class="field full">
-        <label id="noteLabel">Poznámka</label>
-        <textarea class="input textarea" name="note"></textarea>
-      </div>
-
-      <div class="field full">
-        <div class="actions">
-          <button class="btn green" type="submit">Uložiť rezerváciu</button>
-          <button class="btn red hidden" type="button" id="deleteBtn">Odstrániť</button>
-        </div>
-        <div id="modalNotice" class="notice hidden"></div>
-      </div>
-    </form>
-  </div>
-</div>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../assets/config.js"></script><script src="../assets/app.js"></script>
 <script>
-const $=s=>document.querySelector(s);
-const $$=s=>[...document.querySelectorAll(s)];
-const params=new URLSearchParams(location.search);
-const mode=params.get('mode')==='admin'?'admin':'public';
-const clubId=params.get('club')||null;
-const db=window.cspAuth?.client||null;
+(()=>{'use strict';
+const A=CSPClubManager,$=id=>document.getElementById(id),SH=8,EH=24,HW=118,SNAP=30;
+let ctx,stations=[],reservations=[],events=[],blocks=[],selected=startDay(new Date()),view='day',filter='all',mode='reservation',editingReservation=null,editingBlock=null,channel,rt;
+logout.onclick=A.logout;
+function startDay(v){const d=new Date(v);d.setHours(0,0,0,0);return d}function endDay(v){const d=startDay(v);d.setDate(d.getDate()+1);return d}
+function startWeek(v){const d=startDay(v),n=(d.getDay()+6)%7;d.setDate(d.getDate()-n);return d}function endWeek(v){const d=startWeek(v);d.setDate(d.getDate()+7);return d}
+function startMonth(v){return new Date(v.getFullYear(),v.getMonth(),1)}function endMonth(v){return new Date(v.getFullYear(),v.getMonth()+1,1)}function startYear(v){return new Date(v.getFullYear(),0,1)}function endYear(v){return new Date(v.getFullYear()+1,0,1)}
+function range(){return view==='day'?[startDay(selected),endDay(selected)]:view==='week'?[startWeek(selected),endWeek(selected)]:view==='month'?[startMonth(selected),endMonth(selected)]:[startYear(selected),endYear(selected)]}
+function local(v){const d=new Date(v);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)}
+function msg(t){notice.innerHTML=t?`<div class="notice">${A.esc(t)}</div>`:'';if(t)setTimeout(()=>notice.innerHTML='',4500)}
+function title(){if(view==='day')return new Intl.DateTimeFormat('sk-SK',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(selected);if(view==='month')return new Intl.DateTimeFormat('sk-SK',{month:'long',year:'numeric'}).format(selected);if(view==='year')return String(selected.getFullYear());const a=startWeek(selected),b=new Date(endWeek(selected)-1);return`${a.toLocaleDateString('sk-SK')} – ${b.toLocaleDateString('sk-SK')}`}
+async function load(){ctx=await A.requireAccess();clubName.textContent=ctx.club?.name||'Klub';const[from,to]=range();const[st,rs,ev,bl]=await Promise.all([
+A.db.from('stations').select('*').eq('club_id',ctx.club.id).eq('is_active',true).order('sort_order').order('name'),
+A.db.from('reservations').select('*').eq('club_id',ctx.club.id).lt('starts_at',to.toISOString()).gt('ends_at',from.toISOString()).not('status','eq','cancelled').order('starts_at'),
+A.db.from('events').select('*').eq('club_id',ctx.club.id).lt('starts_at',to.toISOString()).or(`ends_at.is.null,ends_at.gt.${from.toISOString()}`).order('starts_at'),
+A.db.from('calendar_station_blocks').select('*').eq('club_id',ctx.club.id).lt('starts_at',to.toISOString()).gt('ends_at',from.toISOString()).order('starts_at')
+]);if(st.error||rs.error||ev.error||bl.error)throw st.error||rs.error||ev.error||bl.error;stations=st.data||[];reservations=rs.data||[];events=ev.data||[];blocks=bl.data||[];render();if(!channel)channel=A.subscribe(ctx.club.id,()=>{clearTimeout(rt);rt=setTimeout(()=>load().catch(e=>msg(e.message)),220)})}
+function render(){datePicker.value=local(selected).slice(0,10);dateTitle.textContent=title();document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('active',b.dataset.filter===filter));modeHelp.textContent=mode==='reservation'?'Klikni na zelený čas, vyplň údaje a po potvrdení sa zmení na červený.':'Klikni na zelený čas pri stole, kde sa bude hrať semifinále alebo finále. Ostatné stoly zostanú zelené.';({day:renderDay,week:renderWeek,month:renderMonth,year:renderYear}[view])()}
+function style(s,e,base){return`left:${((s-base)/60000)/60*HW}px;width:${Math.max(42,((e-s)/60000)/60*HW)}px`}
+function eventEnd(e){return e.ends_at?new Date(e.ends_at):new Date(new Date(e.starts_at).getTime()+7200000)}
+function renderDay(){const hours=Array.from({length:16},(_,i)=>SH+i),base=new Date(selected);base.setHours(SH,0,0,0);const limit=new Date(selected);limit.setHours(EH,0,0,0);
+const head=`<div class="day-head"><div class="corner">Stanovisko</div>${hours.map(h=>`<div class="hour">${String(h).padStart(2,'0')}:00</div>`).join('')}</div>`;
+const es=filter==='reservations'?'':events.map(e=>{const s=new Date(Math.max(new Date(e.starts_at),base)),en=new Date(Math.min(eventEnd(e),limit));if(en<=s)return'';return`<div class="event-block" data-event="${e.id}" style="${style(s,en,base)}"><strong>${A.esc(e.title)}</strong><small>${s.toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'})}</small></div>`}).join('');
+const rows=stations.map(st=>{let items='';if(filter!=='events'){items+=reservations.filter(r=>r.station_id===st.id).map(r=>{const s=new Date(Math.max(new Date(r.starts_at),base)),en=new Date(Math.min(new Date(r.ends_at),limit));return`<div class="slot-block ${A.esc(r.status)}" data-reservation="${r.id}" style="${style(s,en,base)}"><span class="slot-type">Rezervácia</span><strong>${A.esc(r.customer_name)}</strong><small>${s.toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'})}–${en.toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'})}</small></div>`}).join('')}if(filter!=='reservations'){items+=blocks.filter(b=>b.station_id===st.id).map(b=>{const s=new Date(Math.max(new Date(b.starts_at),base)),en=new Date(Math.min(new Date(b.ends_at),limit));return`<div class="slot-block tournament" data-block="${b.id}" style="${style(s,en,base)}"><span class="slot-type">Turnaj</span><strong>${A.esc(b.label)}</strong><small>${s.toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'})}–${en.toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'})}</small></div>`}).join('')}return`<div class="station-row"><div class="station-label"><b>${A.esc(st.name)}</b><span>${A.esc(st.sport||'')}</span></div><div class="timeline" data-station="${st.id}"><span class="free-label">VOĽNÉ</span>${items}${nowLine(base)}</div></div>`}).join('');
+calendarGrid.className='day-grid';calendarGrid.innerHTML=head+`<div class="event-strip"><div class="event-strip-label">Turnaje</div><div class="event-track">${es}</div></div>`+rows}
+function nowLine(base){const n=new Date;if(startDay(n).getTime()!==selected.getTime())return'';const m=(n-base)/60000;if(m<0||m>(EH-SH)*60)return'';return`<div class="now-line" style="left:${m/60*HW}px"></div>`}
+function days42(base){const first=startMonth(base),s=startWeek(first);return Array.from({length:42},(_,i)=>new Date(s.getFullYear(),s.getMonth(),s.getDate()+i))}
+function renderMonth(){let h=`<div class="month-grid">${['Po','Ut','St','Št','Pi','So','Ne'].map(x=>`<div class="month-head">${x}</div>`).join('')}`;days42(selected).forEach(d=>{const a=startDay(d),z=endDay(d),rs=filter==='events'?[]:reservations.filter(r=>new Date(r.starts_at)<z&&new Date(r.ends_at)>a),bs=filter==='reservations'?[]:blocks.filter(b=>new Date(b.starts_at)<z&&new Date(b.ends_at)>a),es=filter==='reservations'?[]:events.filter(e=>new Date(e.starts_at)<z&&eventEnd(e)>a);h+=`<div class="month-day ${d.getMonth()!==selected.getMonth()?'out':''}" data-day="${a.toISOString()}"><div class="day-num">${d.getDate()}</div>${es.map(e=>`<div class="chip event" data-event="${e.id}">${A.esc(e.title)}</div>`).join('')}${bs.map(b=>`<div class="chip" data-block="${b.id}">${A.esc(b.label)}</div>`).join('')}${rs.map(r=>`<div class="chip" data-reservation="${r.id}">${A.esc(r.customer_name)}</div>`).join('')}</div>`});calendarGrid.className='';calendarGrid.innerHTML=h+'</div>'}
+function renderWeek(){
+const s=startWeek(selected);
+const days=Array.from({length:7},(_,i)=>new Date(s.getFullYear(),s.getMonth(),s.getDate()+i));
+let h=`<div class="week-grid"><div class="week-head"></div>${days.map(d=>`<div class="week-head">${d.toLocaleDateString('sk-SK',{weekday:'short',day:'numeric',month:'numeric'})}</div>`).join('')}`;
 
-let session=null;
-let weekStart=startOfDay(new Date());
-let stations=[];
-let selectedStationId=null;
-let publicRows=[];
-let adminReservations=[];
-let selectedSlot=null;
-let demoMode=!clubId;
+for(let hr=SH;hr<EH;hr++){
+  h+=`<div class="week-time">${String(hr).padStart(2,'0')}:00</div>`;
 
-function startOfDay(d){const x=new Date(d);x.setHours(0,0,0,0);return x}
-function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x}
-function isoDate(d){return d.toISOString().slice(0,10)}
-function fmtDay(d){return new Intl.DateTimeFormat('sk-SK',{weekday:'short',day:'numeric',month:'numeric'}).format(d)}
-function fmtTime(v){return new Intl.DateTimeFormat('sk-SK',{hour:'2-digit',minute:'2-digit'}).format(new Date(v))}
-function fmtDateTime(v){return new Intl.DateTimeFormat('sk-SK',{day:'numeric',month:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(v))}
-function nextHour(time){const [h,m]=time.split(':').map(Number);return `${String((h+1)%24).padStart(2,'0')}:${String(m).padStart(2,'0')}`}
-function toIsoLocal(date,time){return new Date(`${date}T${time}:00`).toISOString()}
-function esc(v=''){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function showNotice(el,text,type=''){el.textContent=text;el.className='notice '+type}
-function hideNotice(el){el.className='notice hidden'}
+  days.forEach(d=>{
+    const a=new Date(d);
+    a.setHours(hr,0,0,0);
+    const z=new Date(a);
+    z.setHours(hr+1,0,0,0);
 
-async function init(){
-  configureMode();
-  bind();
-  $('#weekStart').value=isoDate(weekStart);
+    const rs=filter==='events'
+      ? []
+      : reservations.filter(r=>new Date(r.starts_at)<z && new Date(r.ends_at)>a);
 
-  if(demoMode){
-    buildDemoData();
-    renderCalendar();
-    return;
-  }
+    const bs=filter==='reservations'
+      ? []
+      : blocks.filter(b=>new Date(b.starts_at)<z && new Date(b.ends_at)>a);
 
-  if(mode==='admin'){
-    const result=await window.cspAuth.getSession();
-    session=result.data?.session||null;
-    if(!session){location.href='/login/';return}
-  }
+    const es=filter==='reservations'
+      ? []
+      : events.filter(e=>new Date(e.starts_at)<z && eventEnd(e)>a);
 
-  await loadStations();
-}
+    const content=[
+      ...es.map(e=>`<div class="chip event" data-event="${e.id}">${A.esc(e.title)}</div>`),
+      ...bs.map(b=>`<div class="chip" data-block="${b.id}">${A.esc(b.label)} · ${A.esc(stations.find(st=>st.id===b.station_id)?.name||'')}</div>`),
+      ...rs.map(r=>`<div class="chip" data-reservation="${r.id}">${A.esc(r.customer_name)} · ${A.esc(stations.find(st=>st.id===r.station_id)?.name||'')}</div>`)
+    ].join('');
 
-function configureMode(){
-  if(mode==='admin'){
-    $('#modeBadge').textContent='Club Manager';
-    $('#pageTitle').textContent='Rezervácie · Club Manager';
-    $('#pageSubtitle').textContent='Personál vidí mená a kontaktné údaje zákazníkov.';
-    $('#adminNewBtn').classList.remove('hidden');
-    $$('.admin-only').forEach(x=>x.classList.remove('hidden'));
-    $('#noteLabel').textContent='Interná poznámka';
-  }
-}
-
-function bind(){
-  $('#prevWeek').onclick=()=>{weekStart=addDays(weekStart,-7);syncWeek()};
-  $('#nextWeek').onclick=()=>{weekStart=addDays(weekStart,7);syncWeek()};
-  $('#todayBtn').onclick=()=>{weekStart=startOfDay(new Date());syncWeek()};
-  $('#weekStart').onchange=e=>{weekStart=startOfDay(new Date(e.target.value+'T00:00:00'));refresh()};
-  $('#stationSelect').onchange=e=>{selectedStationId=e.target.value;refresh()};
-  $('#closeModal').onclick=closeModal;
-  $('#reservationModal').onclick=e=>{if(e.target.id==='reservationModal')closeModal()};
-  $('#durationHours').onchange=updateSummary;
-  $('#reservationForm').onsubmit=saveReservation;
-  $('#deleteBtn').onclick=deleteReservation;
-  $('#adminNewBtn').onclick=()=>openNewReservation(isoDate(weekStart),'16:00');
-}
-
-function syncWeek(){$('#weekStart').value=isoDate(weekStart);refresh()}
-function refresh(){if(demoMode){buildDemoData();renderCalendar()}else loadWeek()}
-
-function buildDemoData(){
-  stations=[
-    {id:'demo-1',name:'Stôl 1'},
-    {id:'demo-2',name:'Stôl 2'},
-    {id:'demo-3',name:'Stôl 3'}
-  ];
-  selectedStationId=selectedStationId||stations[0].id;
-  $('#stationSelect').innerHTML=stations.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
-  $('#stationSelect').value=selectedStationId;
-
-  adminReservations=[];
-  const sample=[
-    [0,'16:00','Peter Novák','0905 123 456'],
-    [0,'18:00','Martin Kováč','0911 222 333'],
-    [1,'17:00','Ján Horváth','0908 444 555'],
-    [2,'19:00','Lucia Bieliková','0907 777 888'],
-    [3,'16:00','Tomáš Urban','0903 111 999'],
-    [4,'20:00','Marek Šimko','0915 555 444'],
-    [5,'18:00','Andrej Polák','0902 333 777']
-  ];
-
-  sample.forEach((x,i)=>{
-    const day=isoDate(addDays(weekStart,x[0]));
-    const start=new Date(toIsoLocal(day,x[1]));
-    adminReservations.push({
-      id:'demo-r-'+i,station_id:selectedStationId,starts_at:start.toISOString(),
-      ends_at:new Date(start.getTime()+3600000).toISOString(),
-      customer_name:x[2],customer_phone:x[3],status:'confirmed'
-    });
+    h+=`<div class="week-cell" data-week-time="${a.toISOString()}">${content||'<small>voľné</small>'}</div>`;
   });
 }
 
-async function loadStations(){
-  if(!db)return showNotice($('#notice'),'Supabase klient nie je dostupný.','error');
-
-  const {data,error}=await db.from('stations')
-    .select('id,name,sport,is_active,sort_order')
-    .eq('club_id',clubId)
-    .eq('is_active',true)
-    .order('sort_order');
-
-  if(error)return showNotice($('#notice'),error.message,'error');
-
-  stations=data||[];
-  $('#stationSelect').innerHTML=stations.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
-  selectedStationId=stations[0]?.id||null;
-
-  if(!selectedStationId){
-    showNotice($('#notice'),'Klub nemá aktívne zariadenia.','error');
-    renderCalendar();
-    return;
-  }
-
-  await loadWeek();
+calendarGrid.className='';
+calendarGrid.innerHTML=h+'</div>';
 }
-
-async function loadWeek(){
-  hideNotice($('#notice'));
-
-  if(mode==='public'){
-    const calls=[];
-    for(let i=0;i<7;i++){
-      calls.push(db.rpc('get_public_booking_calendar',{
-        p_club_id:clubId,
-        p_day:isoDate(addDays(weekStart,i))
-      }));
-    }
-
-    const results=await Promise.all(calls);
-    const error=results.find(x=>x.error)?.error;
-    if(error)return showNotice($('#notice'),error.message,'error');
-
-    publicRows=results.flatMap((r,i)=>(r.data||[]).map(x=>({...x,dayIndex:i})));
-  }else{
-    const start=weekStart.toISOString();
-    const end=addDays(weekStart,7).toISOString();
-
-    const {data,error}=await db.from('reservations')
-      .select('*')
-      .eq('club_id',clubId)
-      .lt('starts_at',end)
-      .gt('ends_at',start);
-
-    if(error)return showNotice($('#notice'),error.message,'error');
-    adminReservations=data||[];
-  }
-
-  renderCalendar();
-}
-
-function getHours(){
-  if(demoMode||mode==='admin'){
-    return ['14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00'];
-  }
-
-  const hours=[...new Set(publicRows
-    .filter(x=>x.station_id===selectedStationId)
-    .map(x=>fmtTime(x.starts_at)))];
-
-  return hours.sort();
-}
-
-function renderCalendar(){
-  $('#weekLabel').textContent=`${fmtDay(weekStart)} – ${fmtDay(addDays(weekStart,6))}`;
-
-  const head=$('#calendarHead');
-  const body=$('#calendarBody');
-  head.innerHTML='<th class="time-cell">Čas</th>';
-  body.innerHTML='';
-
-  for(let i=0;i<7;i++){
-    const d=addDays(weekStart,i);
-    const weekday=new Intl.DateTimeFormat('sk-SK',{weekday:'short'}).format(d);
-    const date=new Intl.DateTimeFormat('sk-SK',{day:'numeric',month:'numeric'}).format(d);
-    head.insertAdjacentHTML('beforeend',`<th><span class="day-name">${weekday}</span><span class="day-date">${date}</span></th>`);
-  }
-
-  const hours=getHours();
-
-  if(!hours.length){
-    body.innerHTML='<tr><td class="time-cell">—</td><td colspan="7" style="padding:26px;color:#8d95a1">Pre vybraný týždeň nie sú nastavené otváracie hodiny.</td></tr>';
-    return;
-  }
-
-  for(const time of hours){
-    let row=`<tr><td class="time-cell">${time}–${nextHour(time)}</td>`;
-
-    for(let dayIndex=0;dayIndex<7;dayIndex++){
-      const day=isoDate(addDays(weekStart,dayIndex));
-      const slot=getSlot(day,time,dayIndex);
-
-      if(!slot.exists){
-        row+='<td class="slot closed">Zatvorené</td>';
-      }else if(slot.busy){
-        if(mode==='admin'){
-          row+=`<td class="slot busy admin-busy" data-id="${slot.reservation?.id||''}">
-            <b>${esc(slot.reservation?.customer_name||'Obsadené')}</b>
-            ${esc(slot.reservation?.customer_phone||'')}
-          </td>`;
-        }else{
-          row+='<td class="slot busy">Obsadené</td>';
-        }
-      }else{
-        row+=`<td class="slot free" data-day="${day}" data-time="${time}">Voľné</td>`;
-      }
-    }
-
-    row+='</tr>';
-    body.insertAdjacentHTML('beforeend',row);
-  }
-
-  $$('.slot.free').forEach(cell=>{
-    cell.onclick=()=>openNewReservation(cell.dataset.day,cell.dataset.time);
-  });
-
-  if(mode==='admin'){
-    $$('.slot.busy[data-id]').forEach(cell=>{
-      if(cell.dataset.id)cell.onclick=()=>openExistingReservation(cell.dataset.id);
-    });
-  }
-}
-
-function getSlot(day,time,dayIndex){
-  const start=new Date(toIsoLocal(day,time));
-  const end=new Date(start.getTime()+3600000);
-
-  if(demoMode||mode==='admin'){
-    const reservation=adminReservations.find(r=>
-      r.station_id===selectedStationId &&
-      ['pending','confirmed','checked_in'].includes(r.status) &&
-      new Date(r.starts_at)<end &&
-      new Date(r.ends_at)>start
-    );
-    return {exists:true,busy:!!reservation,reservation};
-  }
-
-  const row=publicRows.find(x=>
-    x.station_id===selectedStationId &&
-    x.dayIndex===dayIndex &&
-    fmtTime(x.starts_at)===time
-  );
-
-  if(!row)return {exists:false};
-  return {exists:true,busy:row.state!=='available'};
-}
-
-function maxAvailableHours(day,time){
-  let count=0;
-  let cursor=time;
-  const dayIndex=Math.round((startOfDay(new Date(day))-weekStart)/86400000);
-
-  while(count<8){
-    const slot=getSlot(day,cursor,dayIndex);
-    if(!slot.exists||slot.busy)break;
-    count++;
-    cursor=nextHour(cursor);
-  }
-
-  return count;
-}
-
-function openNewReservation(day,time){
-  const max=maxAvailableHours(day,time);
-  if(max<1)return;
-
-  selectedSlot={day,time,reservation:null};
-
-  const form=$('#reservationForm');
-  form.reset();
-  form.reservation_id.value='';
-  if(form.status)form.status.value=mode==='admin'?'confirmed':'pending';
-
-  $('#durationHours').innerHTML='';
-  for(let i=1;i<=max;i++){
-    $('#durationHours').insertAdjacentHTML('beforeend',`<option value="${i}">${i} ${i===1?'hodina':'hodiny'}</option>`);
-  }
-
-  $('#modalTitle').textContent=mode==='admin'?'Nová rezervácia':'Rezervovať termín';
-  $('#deleteBtn').classList.add('hidden');
-  hideNotice($('#modalNotice'));
-  updateSummary();
-  $('#reservationModal').classList.remove('hidden');
-}
-
-function openExistingReservation(id){
-  const reservation=adminReservations.find(x=>x.id===id);
-  if(!reservation)return;
-
-  selectedSlot={
-    day:isoDate(new Date(reservation.starts_at)),
-    time:fmtTime(reservation.starts_at),
-    reservation
-  };
-
-  const duration=Math.max(1,Math.round((new Date(reservation.ends_at)-new Date(reservation.starts_at))/3600000));
-
-  $('#durationHours').innerHTML='';
-  for(let i=1;i<=8;i++){
-    $('#durationHours').insertAdjacentHTML('beforeend',`<option value="${i}">${i} ${i===1?'hodina':'hodiny'}</option>`);
-  }
-
-  const form=$('#reservationForm');
-  form.reservation_id.value=reservation.id;
-  form.duration_hours.value=String(duration);
-  form.customer_name.value=reservation.customer_name||'';
-  form.customer_phone.value=reservation.customer_phone||'';
-  form.customer_email.value=reservation.customer_email||'';
-  form.party_size.value=reservation.party_size||2;
-  if(form.status)form.status.value=reservation.status||'confirmed';
-  form.note.value=reservation.internal_note||'';
-
-  $('#modalTitle').textContent='Detail rezervácie';
-  $('#deleteBtn').classList.remove('hidden');
-  hideNotice($('#modalNotice'));
-  updateSummary();
-  $('#reservationModal').classList.remove('hidden');
-}
-
-function updateSummary(){
-  if(!selectedSlot)return;
-  const hours=Number($('#durationHours').value||1);
-  const start=new Date(toIsoLocal(selectedSlot.day,selectedSlot.time));
-  const end=new Date(start.getTime()+hours*3600000);
-
-  $('#summaryStation').textContent=stations.find(s=>s.id===selectedStationId)?.name||'–';
-  $('#summaryStart').textContent=fmtDateTime(start);
-  $('#summaryEnd').textContent=fmtDateTime(end);
-}
-
-function closeModal(){
-  $('#reservationModal').classList.add('hidden');
-  selectedSlot=null;
-}
-
-async function saveReservation(e){
-  e.preventDefault();
-  hideNotice($('#modalNotice'));
-
-  const formData=Object.fromEntries(new FormData(e.target));
-  const hours=Number(formData.duration_hours);
-  const start=new Date(toIsoLocal(selectedSlot.day,selectedSlot.time));
-  const end=new Date(start.getTime()+hours*3600000);
-
-  if(demoMode){
-    adminReservations.push({
-      id:'demo-'+Date.now(),
-      station_id:selectedStationId,
-      starts_at:start.toISOString(),
-      ends_at:end.toISOString(),
-      customer_name:formData.customer_name,
-      customer_phone:formData.customer_phone||'',
-      customer_email:formData.customer_email||'',
-      party_size:Number(formData.party_size||2),
-      status:mode==='admin'?(formData.status||'confirmed'):'confirmed'
-    });
-    showNotice($('#modalNotice'),'Ukážková rezervácia bola pridaná.','ok');
-    setTimeout(()=>{closeModal();renderCalendar()},600);
-    return;
-  }
-
-  if(mode==='public'){
-    const {error}=await db.rpc('create_public_reservation',{
-      p_club_id:clubId,
-      p_station_id:selectedStationId,
-      p_starts_at:start.toISOString(),
-      p_ends_at:end.toISOString(),
-      p_customer_name:formData.customer_name,
-      p_customer_email:formData.customer_email||null,
-      p_customer_phone:formData.customer_phone||null,
-      p_party_size:formData.party_size?Number(formData.party_size):null,
-      p_public_note:formData.note||null
-    });
-
-    if(error)return showNotice($('#modalNotice'),error.message,'error');
-  }else{
-    const row={
-      club_id:clubId,
-      station_id:selectedStationId,
-      starts_at:start.toISOString(),
-      ends_at:end.toISOString(),
-      customer_name:formData.customer_name,
-      customer_email:formData.customer_email||null,
-      customer_phone:formData.customer_phone||null,
-      party_size:formData.party_size?Number(formData.party_size):null,
-      status:formData.status,
-      source:'admin',
-      internal_note:formData.note||null,
-      created_by:session.user.id
-    };
-
-    const query=formData.reservation_id
-      ? db.from('reservations').update(row).eq('id',formData.reservation_id)
-      : db.from('reservations').insert(row);
-
-    const {error}=await query;
-    if(error)return showNotice($('#modalNotice'),error.message,'error');
-  }
-
-  showNotice($('#modalNotice'),'Rezervácia bola uložená.','ok');
-  setTimeout(async()=>{closeModal();await loadWeek()},600);
-}
-
-async function deleteReservation(){
-  const id=$('#reservationForm').reservation_id.value;
-  if(!id||!confirm('Naozaj odstrániť rezerváciu?'))return;
-
-  if(demoMode){
-    adminReservations=adminReservations.filter(x=>x.id!==id);
-    closeModal();
-    renderCalendar();
-    return;
-  }
-
-  const {error}=await db.from('reservations').delete().eq('id',id);
-  if(error)return showNotice($('#modalNotice'),error.message,'error');
-
-  closeModal();
-  await loadWeek();
-}
-
-init();
-</script>
-</body>
-</html>
+function renderYear(){const y=selected.getFullYear();let h='<div class="year-grid">';for(let m=0;m<12;m++){const b=new Date(y,m,1);h+=`<div class="year-month"><h3>${b.toLocaleDateString('sk-SK',{month:'long'})}</h3><div class="mini-grid">${['P','U','S','Š','P','S','N'].map(x=>`<div class="mini-head">${x}</div>`).join('')}${days42(b).map(d=>{const a=startDay(d),z=endDay(d),busy=reservations.some(r=>new Date(r.starts_at)<z&&new Date(r.ends_at)>a)||blocks.some(x=>new Date(x.starts_at)<z&&new Date(x.ends_at)>a),ev=events.some(e=>new Date(e.starts_at)<z&&eventEnd(e)>a);return`<div class="mini-day ${d.getMonth()!==m?'out':''} ${busy?'busy':''} ${ev?'event':''}" data-day="${a.toISOString()}">${d.getDate()}</div>`}).join('')}</div></div>`}calendarGrid.className='';calendarGrid.innerHTML=h+'</div>'}
+function stationOptions(id){return stations.map(s=>`<option value="${s.id}" ${s.id===id?'selected':''}>${A.esc(s.name)}</option>`).join('')}
+function clickTime(tl,x){const rect=tl.getBoundingClientRect(),mins=Math.floor(((x-rect.left)/HW*60)/SNAP)*SNAP,s=new Date(selected);s.setHours(SH,mins,0,0);return s}
+function newReservation(stationId,s){editingReservation=null;rStation.innerHTML=stationOptions(stationId);const e=new Date(s.getTime()+3600000);rName.value=rPhone.value=rEmail.value=rNote.value='';rParty.value=2;rStatus.value='confirmed';rStarts.value=local(s);rEnds.value=local(e);rCancel.classList.add('hidden');rStart.classList.add('hidden');reservationTitle.textContent='Nová rezervácia';reservationModal.classList.remove('hidden')}
+function editReservation(id){const r=reservations.find(x=>x.id===id);if(!r)return;editingReservation=id;rStation.innerHTML=stationOptions(r.station_id);rName.value=r.customer_name||'';rPhone.value=r.customer_phone||'';rEmail.value=r.customer_email||'';rParty.value=r.party_size||1;rStatus.value=r.status==='pending'?'pending':'confirmed';rStarts.value=local(r.starts_at);rEnds.value=local(r.ends_at);rNote.value=r.internal_note||'';rCancel.classList.remove('hidden');rStart.classList.toggle('hidden',r.status==='checked_in');reservationTitle.textContent='Upraviť rezerváciu';reservationModal.classList.remove('hidden')}
+function newBlock(stationId,s){editingBlock=null;bStation.innerHTML=stationOptions(stationId);bEvent.innerHTML='<option value="">Bez väzby</option>'+events.map(e=>`<option value="${e.id}">${A.esc(e.title)}</option>`).join('');bLabel.value='Semifinále';bStarts.value=local(s);bEnds.value=local(new Date(s.getTime()+3600000));bDelete.classList.add('hidden');blockModal.classList.remove('hidden')}
+function editBlock(id){const b=blocks.find(x=>x.id===id);if(!b)return;editingBlock=id;bStation.innerHTML=stationOptions(b.station_id);bEvent.innerHTML='<option value="">Bez väzby</option>'+events.map(e=>`<option value="${e.id}" ${e.id===b.event_id?'selected':''}>${A.esc(e.title)}</option>`).join('');bLabel.value=b.label;bStarts.value=local(b.starts_at);bEnds.value=local(b.ends_at);bDelete.classList.remove('hidden');blockModal.classList.remove('hidden')}
+calendarGrid.onclick=e=>{const r=e.target.closest('[data-reservation]');if(r)return editReservation(r.dataset.reservation);const b=e.target.closest('[data-block]');if(b)return editBlock(b.dataset.block);const ev=e.target.closest('[data-event]');if(ev){const x=events.find(v=>v.id===ev.dataset.event);if(!x)return;eTitle.textContent=x.title;eText.textContent=x.description||'';eOpen.href=`/predregistracia/?event=${encodeURIComponent(x.id)}`;eventModal.classList.remove('hidden');return}const wt=e.target.closest('[data-week-time]');if(wt){const s=new Date(wt.dataset.weekTime);if(mode==='reservation')return newReservation(stations[0]?.id||null,s);return newBlock(stations[0]?.id||null,s)}const day=e.target.closest('[data-day]');if(day){selected=startDay(day.dataset.day);view='day';return load()}const tl=e.target.closest('[data-station]');if(tl){const s=clickTime(tl,e.clientX);mode==='reservation'?newReservation(tl.dataset.station,s):newBlock(tl.dataset.station,s)}}
+rSave.onclick=async()=>{const{error}=await A.db.rpc('club_manager_upsert_reservation',{p_reservation_id:editingReservation,p_club_id:ctx.club.id,p_station_id:rStation.value,p_customer_name:rName.value.trim(),p_customer_email:rEmail.value.trim()||null,p_customer_phone:rPhone.value.trim()||null,p_party_size:Number(rParty.value||1),p_starts_at:new Date(rStarts.value).toISOString(),p_ends_at:new Date(rEnds.value).toISOString(),p_internal_note:rNote.value.trim()||null,p_status:rStatus.value});if(error)return msg(error.message.includes('STATION_BLOCKED')?'Stôl je v tomto čase označený pre turnaj.':error.message);reservationModal.classList.add('hidden');load()}
+rCancel.onclick=async()=>{if(editingReservation&&confirm('Zrušiť rezerváciu?')){const{error}=await A.db.rpc('club_manager_set_reservation_status',{p_reservation_id:editingReservation,p_status:'cancelled'});if(error)return msg(error.message);reservationModal.classList.add('hidden');load()}}
+rStart.onclick=async()=>{const{error}=await A.db.rpc('club_manager_start_reservation',{p_reservation_id:editingReservation,p_price_profile_code:'walkin'});if(error)return msg(error.message);location.href='../dashboard/'}
+bSave.onclick=async()=>{const{error}=await A.db.rpc('club_manager_upsert_station_block',{p_block_id:editingBlock,p_club_id:ctx.club.id,p_station_id:bStation.value,p_event_id:bEvent.value||null,p_tournament_id:null,p_label:bLabel.value.trim()||'Turnaj',p_block_type:'tournament',p_starts_at:new Date(bStarts.value).toISOString(),p_ends_at:new Date(bEnds.value).toISOString()});if(error)return msg(error.message==='STATION_HAS_RESERVATION'?'Na stole už je v tomto čase rezervácia.':error.message);blockModal.classList.add('hidden');load()}
+bDelete.onclick=async()=>{if(editingBlock&&confirm('Odstrániť označenie turnajového stola?')){const{error}=await A.db.from('calendar_station_blocks').delete().eq('id',editingBlock);if(error)return msg(error.message);blockModal.classList.add('hidden');load()}}
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$(b.dataset.close).classList.add('hidden'));document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{view=b.dataset.view;load()});document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;render()});document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{filter=b.dataset.filter;render()});
+prev.onclick=()=>{const d=new Date(selected);view==='day'?d.setDate(d.getDate()-1):view==='week'?d.setDate(d.getDate()-7):view==='month'?d.setMonth(d.getMonth()-1):d.setFullYear(d.getFullYear()-1);selected=startDay(d);load()};next.onclick=()=>{const d=new Date(selected);view==='day'?d.setDate(d.getDate()+1):view==='week'?d.setDate(d.getDate()+7):view==='month'?d.setMonth(d.getMonth()+1):d.setFullYear(d.getFullYear()+1);selected=startDay(d);load()};today.onclick=()=>{selected=startDay(new Date);load()};datePicker.onchange=()=>{selected=startDay(datePicker.value+'T00:00:00');load()};load().catch(e=>msg(e.message));
+})();
+</script></body></html>
