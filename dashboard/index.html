@@ -47,8 +47,15 @@ async function startReservation(id){return act('res-'+id,async()=>{const {error}
 async function pause(id){return act(id,async()=>{const {error}=await A.db.rpc('club_manager_pause_session',{p_session_id:id});if(error)throw error})}
 async function resume(id){return act(id,async()=>{const {error}=await A.db.rpc('club_manager_resume_session',{p_session_id:id});if(error)throw error})}
 async function stop(id){return act(id,async()=>{const {error}=await A.db.rpc('club_manager_stop_session',{p_session_id:id});if(error)throw error})}
-async function settle(id){return act('settle-'+id,async()=>{const {error}=await A.db.rpc('club_manager_settle_session',{p_session_id:id});if(error)throw error})}
-function openAdjust(id){selectedSession=sessions.find(x=>x.id===id);adjustMinutes.value=Math.round(Number(selectedSession.accumulated_seconds||0)/60);adjustAmount.value=Number(selectedSession.adjustment_amount||0).toFixed(2);adjustNote.value=selectedSession.adjustment_note||'';adjustModal.classList.remove('hidden')}
+async function settle(id){return act('settle-'+id,async()=>{const {error}=await A.db.rpc('club_manager_settle_session',{p_session_id:id,p_payment_method:'cash',p_final_amount:null});if(error)throw error})}
+function openAdjust(id){
+selectedSession=sessions.find(x=>x.id===id);
+if(!selectedSession)return;
+adjustMinutes.value=Math.round(A.currentSeconds(selectedSession)/60);
+adjustAmount.value=Number(selectedSession.adjustment_amount||0).toFixed(2);
+adjustNote.value=selectedSession.adjustment_note||'';
+adjustModal.classList.remove('hidden')
+}
 adjustConfirm.onclick=()=>act('adj-'+selectedSession.id,async()=>{const {error}=await A.db.rpc('club_manager_adjust_session',{p_session_id:selectedSession.id,p_accumulated_seconds:Math.max(0,Number(adjustMinutes.value)*60),p_adjustment_amount:Number(adjustAmount.value||0),p_adjustment_note:adjustNote.value});if(error)throw error;closeModal('adjustModal')});
 function card(st){const s=activeFor(st.id),unpaid=stoppedFor(st.id),r=upcomingFor(st.id),disabled=k=>busy.has(k)?'disabled':'';let body='';
 if(s){const paused=s.status==='paused';body=`<div class="timer">${A.time(A.currentSeconds(s))}</div><div class="row-actions"><button class="action pause" ${disabled(s.id)} data-action="${paused?'resume':'pause'}" data-id="${s.id}">${paused?'▶ Pokračovať':'⏸ Pauza'}</button><button class="action stop" ${disabled(s.id)} data-action="stop" data-id="${s.id}">⏹ Stop</button><button class="action" data-action="adjust" data-id="${s.id}">Korekcia</button></div>`}
