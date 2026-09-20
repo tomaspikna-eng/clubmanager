@@ -83,7 +83,10 @@ a{color:inherit}
   font-weight:500;
   transition:.16s ease
 }
+.nav-link .nav-icon{width:21px;height:21px;display:grid;place-items:center;color:#d9ddde;flex:0 0 21px}
+.nav-link .nav-icon svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .nav-link:hover{background:rgba(255,255,255,.025)}
+.nav-link.active .nav-icon{color:var(--gold)}
 .nav-link.active{
   color:#fff;
   background:linear-gradient(90deg,rgba(228,187,98,.12),rgba(228,187,98,.02));
