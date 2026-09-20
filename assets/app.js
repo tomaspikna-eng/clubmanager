@@ -4,7 +4,7 @@ const cfg=window.CSP_CM_CONFIG;
 if(!cfg||!window.supabase) throw new Error('Supabase configuration is missing.');
 const db=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
 const parts=location.pathname.split('/').filter(Boolean);
-const routeNames=new Set(['login','dashboard','venues','reservations']);
+const routeNames=new Set(['login','dashboard','venues','reservations','reports','attendance','personal','bar']);
 if(parts.length&&routeNames.has(parts.at(-1)))parts.pop();
 const rootPath='/'+(parts.length?parts.join('/')+'/':'');
 const route=(name='')=>rootPath+String(name).replace(/^\/+/,'');
