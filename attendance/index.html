@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dochádzka — CSP Club Manager</title>
+<link rel="stylesheet" href="../assets/styles.css">
+<style>
+.att-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.att-head h1{margin:0 0 5px;font-size:28px;letter-spacing:-.035em}.att-head p{margin:0;color:var(--muted);font-size:12px}
+.module-switch{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#0d1112}
+.module-switch strong{font-size:11px}.module-switch button{min-width:74px}
+.off-state{padding:36px;border:1px solid var(--line);border-radius:9px;background:linear-gradient(145deg,#101516,#0b0f10);text-align:center}
+.off-state h2{margin:0 0 8px}.off-state p{max-width:620px;margin:0 auto 18px;color:var(--muted);line-height:1.6;font-size:12px}
+.att-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(330px,.8fr);gap:14px}
+.employee-list{display:grid;gap:10px}
+.employee-card{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:14px;border:1px solid var(--line);border-radius:9px;background:linear-gradient(145deg,#111617,#0c1011)}
+.employee-card.active{border-color:rgba(88,223,138,.34);background:radial-gradient(circle at 90% 0,rgba(88,223,138,.09),transparent 32%),linear-gradient(145deg,#111817,#0d1210)}
+.employee-main h3{margin:0;font-size:14px}.employee-main p{margin:4px 0 0;color:var(--muted);font-size:10px}
+.employee-status{margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.pill{padding:5px 8px;border-radius:5px;border:1px solid var(--line);font-size:9px;color:var(--muted2)}.pill.live{color:var(--green);border-color:rgba(88,223,138,.28);background:rgba(88,223,138,.06)}.pill.break{color:var(--gold2);border-color:rgba(228,187,98,.28);background:rgba(228,187,98,.06)}
+.employee-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.employee-actions button{width:auto;min-width:92px}
+.summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}.summary-box{padding:13px;border:1px solid var(--line);border-radius:8px;background:#0d1112}.summary-box span{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em}.summary-box b{display:block;margin-top:6px;font-size:19px;color:var(--gold2)}
+.add-employee{display:grid;grid-template-columns:1.2fr 1fr .7fr auto;gap:8px;margin-bottom:16px}.add-employee input{width:100%}
+.month-controls{display:flex;align-items:center;gap:8px;margin-bottom:10px}.month-controls input{max-width:180px}
+.att-table{width:100%;border-collapse:collapse;font-size:11px}.att-table th,.att-table td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left}.att-table th{color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.06em}.att-table td.num{text-align:right;font-weight:700}
+@media(max-width:1050px){.att-grid{grid-template-columns:1fr}.add-employee{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.add-employee{grid-template-columns:1fr}.employee-card{grid-template-columns:1fr}.employee-actions{justify-content:flex-start}.summary-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="brand-mark">C</div><div><div class="brand-name"><span>Connect</span>Sports<span>Pro</span></div><div class="brand-sub">Club Manager</div></div></div>
+  <nav aria-label="Club Manager">
+    <a class="nav-link" href="../dashboard/"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6v-9h-6v9Zm0-16v5h6V4h-6Z"/></svg></span>Dashboard</a>
+    <a class="nav-link" href="../reports/"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20V7M2 20h22"/></svg></span>Prehľad prevádzky</a>
+    <a class="nav-link active" href="../attendance/"><span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-5 4-7 8-7s7 2 8 7M18 5v4M16 7h4"/></svg></span>Dochádzka</a>
+    <a class="nav-link" href="../reservations/"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M5 4v3M19 4v3M4 9h16M5 6h14v14H5Z"/><path d="M8 13h3M13 13h3M8 16h3"/></svg></span>Rezervácie</a>
+    <a class="nav-link" href="../venues/"><span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="m12 3 2 6M21 12l-6 2M12 21l-2-6M3 12l6-2"/></svg></span>Športoviská</a>
+  </nav>
+</aside>
+<main class="main">
+<header class="topbar"><div><strong id="clubName">Club Manager</strong> · Dochádzka</div><button class="ghost" id="logout">Odhlásiť</button></header>
+<section class="content">
+  <div class="att-head">
+    <div><h1>Dochádzkový systém</h1><p>Jednoduchá evidencia smien, prestávok a odpracovaného času.</p></div>
+    <div class="module-switch"><strong>Dochádzka</strong><button class="ghost" id="toggleModule">Načítavam…</button></div>
+  </div>
+  <div id="notice"></div>
+  <div id="disabledView" class="off-state" hidden>
+    <h2>Dochádzka nie je aktivovaná</h2>
+    <p>Tento modul je voliteľný. Po zapnutí môžete evidovať zamestnancov, príchody, odchody, prestávky a mesačný odpracovaný čas.</p>
+    <button class="primary" id="enableModule">Aktivovať dochádzku</button>
+  </div>
+  <div id="enabledView" hidden>
+    <div class="panel">
+      <div class="add-employee">
+        <input id="employeeName" placeholder="Meno zamestnanca">
+        <input id="employeeRole" placeholder="Pozícia / rola">
+        <input id="employeeRate" type="number" min="0" step=".01" placeholder="€/h">
+        <button class="primary" id="addEmployee">Pridať</button>
+      </div>
+    </div>
+
+    <div class="att-grid">
+      <section class="panel">
+        <div class="page-head"><h1 style="font-size:20px">Dochádzka dnes</h1><p>Aktuálny stav zamestnancov a ovládanie smien.</p></div>
+        <div class="employee-list" id="employeeList"></div>
+      </section>
+      <aside>
+        <section class="panel">
+          <div class="page-head"><h1 style="font-size:20px">Dnes</h1><p>Súhrn aktuálneho dňa.</p></div>
+          <div class="summary-grid" id="todaySummary"></div>
+        </section>
+        <section class="panel">
+          <div class="page-head"><h1 style="font-size:20px">Mesačný prehľad</h1><p>Odpracované hodiny podľa zamestnanca.</p></div>
+          <div class="month-controls"><input type="month" id="monthPicker"></div>
+          <div style="overflow:auto"><table class="att-table"><thead><tr><th>Zamestnanec</th><th>Smien</th><th>Prestávky</th><th style="text-align:right">Odpracované</th></tr></thead><tbody id="monthRows"></tbody></table></div>
+        </section>
+      </aside>
+    </div>
+  </div>
+</section>
+</main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/config.js"></script>
+<script src="../assets/app.js"></script>
+<script>
+(()=>{
+'use strict';
+const A=window.CSPClubManager,$=id=>document.getElementById(id);
+let ctx,enabled=false,employees=[],sessions=[];
+logout.onclick=()=>A.logout();
+function esc(v){return A.esc(v)}
+function show(msg){notice.innerHTML='<div class="notice">'+esc(msg)+'</div>';setTimeout(()=>notice.innerHTML='',3500)}
+function sec(s){return Math.max(0,Math.floor(Number(s||0)))}
+function sessionNet(s){
+  const end=s.clock_out_at?new Date(s.clock_out_at).getTime():Date.now();
+  const total=Math.max(0,Math.floor((end-new Date(s.clock_in_at).getTime())/1000));
+  let br=sec(s.break_seconds);
+  if(s.status==='break'&&s.break_started_at)br+=Math.max(0,Math.floor((Date.now()-new Date(s.break_started_at).getTime())/1000));
+  return Math.max(0,total-br);
+}
+function activeSession(employeeId){return sessions.find(s=>s.employee_id===employeeId&&['working','break'].includes(s.status))}
+async function load(){
+  ctx=await A.requireAccess();clubName.textContent=ctx.club?.name||'Klub';
+  const clubId=ctx.club.id;
+  const [club,emp,ses]=await Promise.all([
+    A.db.from('clubs').select('attendance_enabled').eq('id',clubId).single(),
+    A.db.from('club_employees').select('*').eq('club_id',clubId).eq('is_active',true).order('full_name'),
+    A.db.from('club_attendance_sessions').select('*').eq('club_id',clubId).gte('clock_in_at',new Date(new Date().getFullYear(),new Date().getMonth()-1,1).toISOString()).order('clock_in_at',{ascending:false})
+  ]);
+  const err=club.error||emp.error||ses.error;if(err)throw err;
+  enabled=!!club.data?.attendance_enabled;employees=emp.data||[];sessions=ses.data||[];
+  render();
+}
+function render(){
+  toggleModule.textContent=enabled?'ÁNO':'NIE';
+  toggleModule.style.color=enabled?'var(--green)':'var(--muted)';
+  disabledView.hidden=enabled;enabledView.hidden=!enabled;
+  if(!enabled)return;
+  const todayStart=new Date();todayStart.setHours(0,0,0,0);
+  const today=sessions.filter(s=>new Date(s.clock_in_at)>=todayStart);
+  employeeList.innerHTML=employees.length?employees.map(e=>{
+    const s=activeSession(e.id),isBreak=s?.status==='break';
+    const state=s?(isBreak?'Prestávka':'V práci'):'Mimo';
+    const cls=s?(isBreak?'break':'live'):'';
+    const time=s?A.time(sessionNet(s)):'—';
+    return '<article class="employee-card '+(s?'active':'')+'"><div class="employee-main"><h3>'+esc(e.full_name)+'</h3><p>'+esc(e.role_name||'Zamestnanec')+(e.hourly_rate!=null?' · '+A.money(e.hourly_rate)+'/h':'')+'</p><div class="employee-status"><span class="pill '+cls+'">'+state+'</span><span class="pill">'+time+'</span></div></div><div class="employee-actions">'+
+      (!s?'<button class="primary" data-action="in" data-id="'+e.id+'">Príchod</button>':
+        '<button class="ghost" data-action="break" data-id="'+s.id+'">'+(isBreak?'Pokračovať':'Prestávka')+'</button><button class="ghost" data-action="out" data-id="'+s.id+'">Odchod</button>')+
+      '</div></article>';
+  }).join(''):'<div class="empty">Zatiaľ nemáte pridaných zamestnancov.</div>';
+  const working=employees.filter(e=>activeSession(e.id)?.status==='working').length;
+  const breaks=employees.filter(e=>activeSession(e.id)?.status==='break').length;
+  const worked=today.reduce((a,s)=>a+sessionNet(s),0);
+  todaySummary.innerHTML=[
+    ['V práci',working],['Na prestávke',breaks],['Smien dnes',today.length],['Odpracované',A.time(worked)]
+  ].map(x=>'<div class="summary-box"><span>'+x[0]+'</span><b>'+x[1]+'</b></div>').join('');
+  renderMonth();
+}
+function renderMonth(){
+  const val=monthPicker.value||new Date().toISOString().slice(0,7);
+  const [y,m]=val.split('-').map(Number),from=new Date(y,m-1,1),to=new Date(y,m,1);
+  const list=sessions.filter(s=>new Date(s.clock_in_at)>=from&&new Date(s.clock_in_at)<to&&s.status==='completed');
+  monthRows.innerHTML=employees.length?employees.map(e=>{
+    const mine=list.filter(s=>s.employee_id===e.id);
+    const worked=mine.reduce((a,s)=>a+sessionNet(s),0),br=mine.reduce((a,s)=>a+sec(s.break_seconds),0);
+    return '<tr><td>'+esc(e.full_name)+'</td><td>'+mine.length+'</td><td>'+A.time(br)+'</td><td class="num">'+A.time(worked)+'</td></tr>';
+  }).join(''):'<tr><td colspan="4" class="empty">Bez dát.</td></tr>';
+}
+async function setEnabled(value){
+  const {error}=await A.db.rpc('club_manager_set_attendance_enabled',{p_enabled:value});if(error)throw error;
+  enabled=value;render();show(value?'Dochádzka bola aktivovaná.':'Dochádzka bola vypnutá.');
+}
+toggleModule.onclick=()=>setEnabled(!enabled).catch(e=>show(e.message));
+enableModule.onclick=()=>setEnabled(true).catch(e=>show(e.message));
+addEmployee.onclick=async()=>{
+  const name=employeeName.value.trim();if(!name)return show('Zadajte meno zamestnanca.');
+  const row={club_id:ctx.club.id,full_name:name,role_name:employeeRole.value.trim()||null,hourly_rate:employeeRate.value?Number(employeeRate.value):null};
+  const {error}=await A.db.from('club_employees').insert(row);if(error)return show(error.message);
+  employeeName.value='';employeeRole.value='';employeeRate.value='';await load();
+};
+employeeList.onclick=async e=>{
+  const b=e.target.closest('[data-action]');if(!b)return;
+  try{
+    if(b.dataset.action==='in'){const {error}=await A.db.rpc('club_manager_attendance_clock_in',{p_employee_id:b.dataset.id});if(error)throw error}
+    if(b.dataset.action==='break'){const {error}=await A.db.rpc('club_manager_attendance_toggle_break',{p_session_id:b.dataset.id});if(error)throw error}
+    if(b.dataset.action==='out'){const {error}=await A.db.rpc('club_manager_attendance_clock_out',{p_session_id:b.dataset.id});if(error)throw error}
+    await load();
+  }catch(err){show(err.message)}
+};
+monthPicker.value=new Date().toISOString().slice(0,7);monthPicker.onchange=renderMonth;
+setInterval(()=>{if(enabled)render()},1000);
+load().catch(e=>show(e.message));
+})();
+</script>
+</body>
+</html>
