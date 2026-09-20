@@ -7,21 +7,48 @@
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:grid;place-items:center;padding:18px;z-index:3000}.modal.hidden{display:none}.modal-card{width:min(520px,100%);background:#111;border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:20px}.modal-grid{display:grid;gap:12px}.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
 .qr-card{text-align:center}.qr-card h3{margin:0 0 6px}.qr-card>p{margin:0 0 16px;color:#aaa}.qr-code{width:256px;min-height:256px;margin:0 auto 14px;padding:12px;border-radius:14px;background:#fff;display:grid;place-items:center}.qr-code img,.qr-code canvas{display:block;max-width:100%;height:auto}.qr-url{display:block;overflow-wrap:anywhere;color:#d4a843;font-size:13px}.qr-hint{margin:14px 0 0!important;color:#ddd!important;font-size:14px}
 .badge{font-size:12px;padding:4px 8px;border-radius:999px;background:#222}.badge.warn{color:#d4a843}.badge.ok{color:#53d98b}
-.bottom-nav{display:none}@media(max-width:760px){.sidebar{display:none}.main{margin-left:0!important}.bottom-nav{position:fixed;display:grid;grid-template-columns:repeat(4,1fr);left:0;right:0;bottom:0;background:#111;border-top:1px solid rgba(255,255,255,.1);z-index:1000}.bottom-nav a{padding:11px 5px;text-align:center;font-size:12px}.content{padding-bottom:80px!important}}
+.analytics-section{margin-top:28px;padding-top:24px;border-top:1px solid rgba(255,255,255,.08)}
+.analytics-head{display:flex;align-items:end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.analytics-head h2{margin:0;font-size:22px}.analytics-head p{margin:5px 0 0;color:#929292;font-size:13px}
+.period-switch{display:flex;gap:7px;flex-wrap:wrap}.period-switch button.active{background:#d4a843;color:#111;border-color:#d4a843}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.kpi{padding:16px;border:1px solid rgba(255,255,255,.09);border-radius:13px;background:#111}
+.kpi small{display:block;color:#8f8f8f;font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px}
+.kpi b{font-size:24px}.kpi span{display:block;color:#aaa;font-size:12px;margin-top:5px}
+.analytics-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:12px}
+.analytics-card{padding:16px;border:1px solid rgba(255,255,255,.09);border-radius:13px;background:#111}.analytics-card h3{margin:0 0 12px;font-size:15px}
+.rank-row,.break-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06)}.rank-row:last-child,.break-row:last-child{border-bottom:0}
+.rank-row small,.break-row small{color:#999}.rank-value{text-align:right;font-weight:800}.empty-analytics{color:#888;font-size:13px;padding:10px 0}
+.bottom-nav{display:none}@media(max-width:980px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.analytics-grid{grid-template-columns:1fr}}@media(max-width:760px){.sidebar{display:none}.main{margin-left:0!important}.bottom-nav{position:fixed;display:grid;grid-template-columns:repeat(4,1fr);left:0;right:0;bottom:0;background:#111;border-top:1px solid rgba(255,255,255,.1);z-index:1000}.bottom-nav a{padding:11px 5px;text-align:center;font-size:12px}.content{padding-bottom:80px!important}}
 </style></head><body><div class="offline-banner">Offline režim — zobrazené dáta môžu byť neaktuálne.</div>
 <div class="app"><aside class="sidebar"><div class="brand"><div class="brand-mark">C</div><div><div class="brand-name"><span>Connect</span>Sports<span>Pro</span></div><div class="brand-sub">Club Manager</div></div></div>
 <a class="nav-link active" href="../dashboard/">📊 Dashboard</a><a class="nav-link" href="../reservations/">📅 Rezervácie</a><a class="nav-link" href="../venues/">🎱 Športoviská</a></aside>
 <main class="main"><header class="topbar"><div><strong id="clubName">Club Manager</strong> · Dashboard</div><button class="ghost" id="logout">Odhlásiť</button></header>
 <section class="content"><div class="page-head"><h1>Live prevádzka</h1><p>Stanice, rezervácie, upozornenia a platby v jednom pohľade.</p></div>
 <div id="notice"></div><div class="alerts" id="alerts"></div><div class="stats" id="stats"></div>
-<div class="toolbar"><input id="search" placeholder="Hľadať športovisko..."><div class="chips" id="chips"></div><label style="display:flex;align-items:center;gap:8px;margin-left:auto">Upozorniť na rezerváciu<input id="reservationAlertMinutes" type="number" min="0" max="1440" step="5" style="width:90px"><span>min. vopred</span><button class="ghost" id="saveAlertMinutes">Uložiť</button></label></div><div class="grid" id="grid"><div class="empty">Načítavam…</div></div></section></main></div>
+<div class="toolbar"><input id="search" placeholder="Hľadať športovisko..."><div class="chips" id="chips"></div><label style="display:flex;align-items:center;gap:8px;margin-left:auto">Upozorniť na rezerváciu<input id="reservationAlertMinutes" type="number" min="0" max="1440" step="5" style="width:90px"><span>min. vopred</span><button class="ghost" id="saveAlertMinutes">Uložiť</button></label></div><div class="grid" id="grid"><div class="empty">Načítavam…</div></div>
+<section class="analytics-section">
+  <div class="analytics-head">
+    <div><h2>Prehľad prevádzky</h2><p>Tržby, odohraný čas, rezervácie a využitie športovísk.</p></div>
+    <div class="period-switch" id="periodSwitch">
+      <button class="active" data-period="today">Dnes</button>
+      <button data-period="7">7 dní</button>
+      <button data-period="30">30 dní</button>
+    </div>
+  </div>
+  <div class="kpi-grid" id="analyticsKpis"></div>
+  <div class="analytics-grid">
+    <article class="analytics-card"><h3>Najvyužívanejšie športoviská</h3><div id="topStations"></div></article>
+    <article class="analytics-card"><h3>Platby a zákazníci</h3><div id="paymentBreakdown"></div><div id="customerBreakdown" style="margin-top:12px"></div></article>
+  </div>
+</section></section></main></div>
 <nav class="bottom-nav"><a href="../dashboard/">Dashboard</a><a href="../reservations/">Rezervácie</a><a href="../venues/">Stanice</a><a href="#" id="logoutMobile">Odhlásiť</a></nav>
 <div class="modal hidden" id="adjustModal"><div class="modal-card"><h3>Manuálna korekcia</h3><div class="modal-grid">
 <label>Celkový čas v minútach<input id="adjustMinutes" type="number" min="0" step="1"></label><label>Korekcia ceny €<input id="adjustAmount" type="number" step=".01" value="0"></label><label>Dôvod<textarea id="adjustNote" rows="3"></textarea></label></div>
 <div class="modal-actions"><button class="ghost" onclick="closeModal('adjustModal')">Zrušiť</button><button class="primary" id="adjustConfirm">Uložiť korekciu</button></div></div></div>
 <div class="modal hidden" id="qrModal"><div class="modal-card qr-card"><h3 id="qrStationName">QR kód športoviska</h3><p id="qrStationSport"></p><div class="qr-code" id="qrCode"></div><a class="qr-url" id="qrUrl" href="#" target="_blank" rel="noopener"></a><p class="qr-hint">Naskenujte QR kód a otvorte verejný scoreboard bez prihlásenia.</p><div class="modal-actions"><button class="ghost" onclick="closeModal('qrModal')">Zavrieť</button><a class="primary" id="openScoreboard" href="#" target="_blank" rel="noopener">Otvoriť scoreboard</a></div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script><script src="../assets/config.js"></script><script src="../assets/app.js"></script><script>
-const A=CSPClubManager,$=id=>document.getElementById(id);let ctx,stations=[],sessions=[],profiles=[],reservations=[],sport='all',channel,busy=new Set(),selectedSession,reservationAlertWindow=10;
+const A=CSPClubManager,$=id=>document.getElementById(id);let ctx,stations=[],sessions=[],profiles=[],reservations=[],sport='all',channel,busy=new Set(),selectedSession,reservationAlertWindow=10,analyticsPeriod='today',analyticsData=null;
 logout.onclick=A.logout;logoutMobile.onclick=e=>{e.preventDefault();A.logout()};search.oninput=render;
 function closeModal(id){$(id).classList.add('hidden')}window.closeModal=closeModal;
 function openQrModal(id){
@@ -37,8 +64,44 @@ function stoppedFor(id){return sessions.filter(s=>s.station_id===id&&s.status===
 function upcomingFor(id){const now=Date.now(),limit=now+30*60000;return reservations.find(r=>r.station_id===id&&['pending','confirmed'].includes(r.status)&&new Date(r.starts_at).getTime()>=now&&new Date(r.starts_at).getTime()<=limit)}
 async function load(){ctx=await A.requireAccess();clubName.textContent=ctx.club?.name||'Klub';if(!ctx.club)return;reservationAlertWindow=Number(ctx.club.reservation_alert_minutes??10);reservationAlertMinutes.value=reservationAlertWindow;const from=new Date(Date.now()-86400000).toISOString(),to=new Date(Date.now()+7*86400000).toISOString();
 const [st,se,pr,rs]=await Promise.all([A.db.from('stations').select('*').eq('club_id',ctx.club.id).eq('is_active',true).order('sort_order'),A.db.from('club_manager_live_sessions').select('*').eq('club_id',ctx.club.id).in('status',['running','paused','stopped']),A.db.from('club_manager_price_profiles').select('*').eq('club_id',ctx.club.id).eq('is_active',true).order('sort_order'),A.db.from('reservations').select('*').eq('club_id',ctx.club.id).gte('starts_at',from).lte('starts_at',to).in('status',['pending','confirmed','checked_in']).order('starts_at')]);
-const err=st.error||se.error||pr.error||rs.error;if(err)throw err;stations=st.data||[];sessions=se.data||[];profiles=pr.data||[];reservations=rs.data||[];buildChips();render();if(!channel)channel=A.subscribe(ctx.club.id,()=>debouncedLoad())}
+const err=st.error||se.error||pr.error||rs.error;if(err)throw err;stations=st.data||[];sessions=se.data||[];profiles=pr.data||[];reservations=rs.data||[];buildChips();render();await loadAnalytics();if(!channel)channel=A.subscribe(ctx.club.id,()=>debouncedLoad())}
 let reloadTimer;function debouncedLoad(){clearTimeout(reloadTimer);reloadTimer=setTimeout(()=>load().catch(showError),250)}
+
+function analyticsRange(){
+  const to=new Date();
+  let from;
+  if(analyticsPeriod==='today'){from=new Date();from.setHours(0,0,0,0)}
+  else{from=new Date(Date.now()-Number(analyticsPeriod)*86400000)}
+  return {from:from.toISOString(),to:to.toISOString()};
+}
+function formatHours(seconds){const h=Number(seconds||0)/3600;return h<10?h.toFixed(1)+' h':Math.round(h)+' h'}
+function paymentLabel(value){return ({cash:'Hotovosť',card:'Karta',invoice:'Faktúra',other:'Iné'})[value]||value||'Iné'}
+function customerLabel(value){return ({walkin:'Bežný zákazník',member:'Člen',vip:'VIP'})[value]||value||'Zákazník'}
+function renderAnalytics(){
+  const data=analyticsData||{},sum=data.summary||{};
+  $('analyticsKpis').innerHTML=[
+    ['Tržby',A.money(sum.revenue||0),`${Number(sum.paid_sessions||0)} zaplatených hier`],
+    ['Odohraný čas',formatHours(sum.play_seconds||0),`${Number(sum.sessions||0)} ukončených hier`],
+    ['Priemerná hra',A.time(sum.avg_session_seconds||0),'priemer na session'],
+    ['Rezervácie',Number(sum.reservations||0),`${Number(sum.cancelled_reservations||0)} zrušených`]
+  ].map(x=>`<div class="kpi"><small>${x[0]}</small><b>${x[1]}</b><span>${x[2]}</span></div>`).join('');
+
+  const top=Array.isArray(data.top_stations)?data.top_stations:[];
+  $('topStations').innerHTML=top.length?top.map((x,i)=>`<div class="rank-row"><div><b>${i+1}. ${A.esc(x.station_name)}</b><small>${A.esc(x.sport||'')} · ${Number(x.sessions||0)} hier · ${formatHours(x.seconds||0)}</small></div><div class="rank-value">${A.money(x.revenue||0)}</div></div>`).join(''):'<div class="empty-analytics">Za toto obdobie zatiaľ nie sú dáta.</div>';
+
+  const payments=Array.isArray(data.payments)?data.payments:[];
+  $('paymentBreakdown').innerHTML='<b style="font-size:12px;color:#aaa">PLATBY</b>'+(payments.length?payments.map(x=>`<div class="break-row"><div>${A.esc(paymentLabel(x.method))}<small>${Number(x.count||0)} platieb</small></div><div class="rank-value">${A.money(x.amount||0)}</div></div>`).join(''):'<div class="empty-analytics">Žiadne zaplatené session.</div>');
+
+  const customers=Array.isArray(data.customers)?data.customers:[];
+  $('customerBreakdown').innerHTML='<b style="font-size:12px;color:#aaa">ZÁKAZNÍCI</b>'+(customers.length?customers.map(x=>`<div class="break-row"><div>${A.esc(customerLabel(x.customer_type))}<small>${Number(x.count||0)} hier</small></div><div class="rank-value">${A.money(x.amount||0)}</div></div>`).join(''):'<div class="empty-analytics">Bez dát.</div>');
+}
+async function loadAnalytics(){
+  if(!ctx?.club?.id)return;
+  const range=analyticsRange();
+  const {data,error}=await A.db.rpc('get_club_manager_dashboard_stats',{p_club_id:ctx.club.id,p_from:range.from,p_to:range.to});
+  if(error){console.warn('[clubmanager] analytics',error);analyticsData=null;renderAnalytics();return}
+  analyticsData=data||{};renderAnalytics();
+}
 function buildChips(){const sports=[...new Set(stations.map(x=>x.sport))];chips.innerHTML=`<button class="chip ${sport==='all'?'active':''}" data-sport="all">Všetko</button>`+sports.map(x=>`<button class="chip ${sport===x?'active':''}" data-sport="${A.esc(x)}">${A.esc(x)}</button>`).join('');chips.querySelectorAll('[data-sport]').forEach(b=>b.onclick=()=>{sport=b.dataset.sport;buildChips();render()})}
 function showError(e){notice.innerHTML=`<div class="notice">${A.esc(e?.message||e)}</div>`;setTimeout(()=>notice.innerHTML='',5000)}
 async function act(key,fn){if(busy.has(key))return;busy.add(key);render();try{await fn();await load()}catch(e){showError(e)}finally{busy.delete(key);render()}}
@@ -86,6 +149,7 @@ saveAlertMinutes.onclick=async()=>{
   finally{saveAlertMinutes.disabled=false}
 };
 grid.onclick=e=>{const b=e.target.closest('[data-action]');if(!b)return;const id=b.dataset.id;({start:()=>start(id),pause:()=>pause(id),resume:()=>resume(id),stop:()=>stop(id),settle:()=>settle(id),adjust:()=>openAdjust(id),'start-res':()=>startReservation(id),qr:()=>openQrModal(id)}[b.dataset.action]||(()=>{}))()}
+$('periodSwitch').onclick=e=>{const b=e.target.closest('[data-period]');if(!b)return;analyticsPeriod=b.dataset.period;$('periodSwitch').querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b));loadAnalytics().catch(showError)}
 setInterval(()=>{sessions.filter(s=>s.status==='running').forEach(s=>{const el=document.querySelector(`[data-session="${s.id}"] .timer`);if(el)el.textContent=A.time(A.currentSeconds(s))});renderAlerts()},1000);
 addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')load().catch(showError)});
 load().catch(e=>{if(!['PLAN_REQUIRED','LOGIN_REQUIRED'].includes(e.message))grid.innerHTML=`<div class="empty">${A.esc(e.message)}</div>`});
