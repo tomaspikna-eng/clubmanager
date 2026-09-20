@@ -817,7 +817,7 @@
       const result = await A.db.from('stations')
         .update({
           is_active: false,
-          status: 'maintenance'
+          status: 'service'
         })
         .eq('id', deleteId)
         .eq('club_id', ctx.club.id);
