@@ -82,14 +82,35 @@ const api={
  db,route,esc,
  async session(){const {data,error}=await db.auth.getSession();if(error)throw error;return data.session;},
  async requireAccess(){
+   const incomingClub=new URLSearchParams(location.search).get('club');
+   if(incomingClub)localStorage.setItem('csp_cm_expected_club',incomingClub);
+   const expectedClub=localStorage.getItem('csp_cm_expected_club');
+
    const session=await api.session();
-   if(!session){location.replace(route('login/?returnTo=')+encodeURIComponent(location.pathname+location.search));throw new Error('LOGIN_REQUIRED');}
+   if(!session){
+     const ret=location.pathname+location.search;
+     location.replace(route('login/?returnTo=')+encodeURIComponent(ret));
+     throw new Error('LOGIN_REQUIRED');
+   }
+
    const {data,error}=await db.rpc('club_manager_bootstrap');if(error)throw error;
    if(!data?.allowed){
      document.body.innerHTML=`<main class="access-denied"><section><div class="brand-mark">C</div><h1>Club Manager nemáte aktivovaný</h1><p>Prístup určuje oprávnenie účtu. Technické označenia Ultra, Elite a Admin nie sú súčasťou používateľského obsahu.</p><a href="https://connectsportspro.com/">Späť na CONNECT SPORTS PRO</a><button id="logoutDenied">Odhlásiť sa</button></section></main>`;
-     document.getElementById('logoutDenied').onclick=async()=>{await db.auth.signOut();location.replace(route('login/'));};
+     document.getElementById('logoutDenied').onclick=async()=>{await db.auth.signOut();localStorage.removeItem('csp_cm_expected_club');location.replace(route('login/'));};
      throw new Error('PLAN_REQUIRED');
    }
+
+   if(expectedClub && data?.club?.id && data.club.id!==expectedClub){
+     const ret=location.pathname+location.search;
+     await db.auth.signOut();
+     document.body.innerHTML=`<main class="access-denied"><section><div class="brand-mark">C</div><h1>Prihlásený je iný klubový účet</h1><p>Club Manager bol otvorený pre iný klub. Prihlás sa účtom, ktorý patrí k profilu, z ktorého si Club Manager otvoril.</p><a href="${route('login/?returnTo=')+encodeURIComponent(ret)}">Prihlásiť správny účet</a></section></main>`;
+     throw new Error('CLUB_CONTEXT_MISMATCH');
+   }
+
+   if(expectedClub && !data?.club?.id){
+     throw new Error('CLUB_CONTEXT_NOT_FOUND');
+   }
+
    return data;
  },
  money:v=>`${Number(v||0).toFixed(2)} €`,
