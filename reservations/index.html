@@ -51,7 +51,8 @@ box-shadow:inset 0 0 0 1px rgba(38,124,76,.2)}
 </head>
 <body>
 <div class="app">
-<aside class="sidebar"><div class="brand"><div class="brand-mark">C</div><div><div class="brand-name"><span>Connect</span>Sports<span>Pro</span></div><div class="brand-sub">Club Manager</div></div></div><a class="nav-link" href="../dashboard/">📊 Dashboard</a><a class="nav-link active" href="../reservations/">📅 Kalendár</a><a class="nav-link" href="../venues/">🎱 Športoviská</a></aside>
+<aside class="sidebar"><div class="brand"><div class="brand-mark">C</div><div><div class="brand-name"><span>Connect</span>Sports<span>Pro</span></div><div class="brand-sub">Club Manager</div></div></div><a class="nav-link" href="../dashboard/">📊 Dashboard</a>
+    <a class="nav-link" href="../reports/">📈 Prehľad prevádzky</a><a class="nav-link active" href="../reservations/">📅 Kalendár</a><a class="nav-link" href="../venues/">🎱 Športoviská</a></aside>
 <main class="main"><header class="topbar"><div><strong id="clubName">Club Manager</strong> · Kalendár</div><button class="ghost" id="logout">Odhlásiť</button></header>
 <section class="content"><div class="page-head"><h1>Klubový kalendár</h1><p>Zelená znamená voľné. Kliknutím na voľný čas vytvoríš rezerváciu. Červená znamená obsadené.</p></div><div id="notice"></div>
 <div class="calendar-toolbar"><div><button class="view-btn active" data-view="day">Deň</button><button class="view-btn" data-view="week">Týždeň</button><button class="view-btn" data-view="month">Mesiac</button><button class="view-btn" data-view="year">Rok</button></div><div class="grow"></div><button class="ghost" id="prev">←</button><button class="ghost" id="today">Dnes</button><button class="ghost" id="next">→</button><input id="datePicker" type="date"><div class="date-title" id="dateTitle"></div></div>
