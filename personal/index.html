@@ -85,7 +85,7 @@
                 <input id="editPhoto" placeholder="URL fotografie">
                 <input id="editVacationTotal" type="number" min="0" placeholder="Dovolenka spolu">
                 <input id="editVacationUsed" type="number" min="0" placeholder="Dovolenka vyčerpaná">
-                <input id="editSickDays" type="number" min="0" placeholder="PN dní tento rok">
+                <input id="editSickDays" type="number" min="0" placeholder="PN dní tento rok"><input id="editPin" type="password" inputmode="numeric" maxlength="6" placeholder="Nový PIN 4–6 číslic"><button class="ghost" id="savePin" type="button">Nastaviť PIN</button>
               </div>
             </div>
             <div class="hero-actions">
@@ -258,6 +258,7 @@ clockAction.onclick=async()=>{const e=selectedEmployee;if(!e)return;const s=acti
  await load();
  }catch(err){show(err.message)}
 };
+savePin.onclick=async()=>{const e=selectedEmployee;if(!e)return;const pin=editPin.value.trim();if(!/^[0-9]{4,6}$/.test(pin))return show('PIN musí mať 4–6 číslic.');const {error}=await A.db.rpc('club_manager_set_employee_pin',{p_employee_id:e.id,p_pin:pin});if(error)return show(error.message);editPin.value='';show('PIN zamestnanca bol nastavený.');};
 saveProfile.onclick=async()=>{const e=selectedEmployee;if(!e)return;const patch={role_name:editRole.value.trim()||null,hourly_rate:editRate.value?Number(editRate.value):null,phone:editPhone.value.trim()||null,email:editEmail.value.trim()||null,photo_url:editPhoto.value.trim()||null,vacation_days_total:Number(editVacationTotal.value||0),vacation_days_used:Number(editVacationUsed.value||0),sick_days_year:Number(editSickDays.value||0)};
  const {error}=await A.db.from('club_employees').update(patch).eq('id',e.id);if(error)return show(error.message);show('Profil zamestnanca uložený.');await load();
 };
