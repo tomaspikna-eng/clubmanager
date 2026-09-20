@@ -68,9 +68,9 @@
 
   <div class="report-grid">
     <article class="card">
-      <h3>Vývoj tržieb</h3>
-      <div class="muted">Tržby po dňoch za zvolené obdobie</div>
-      <div class="chart" id="revenueChart"></div>
+      <h3>Hodinová vyťaženosť prevádzky</h3>
+      <div class="muted">Priemerná obsadenosť celej dostupnej kapacity v jednotlivých hodinách.</div>
+      <div class="chart" id="utilizationChart"></div>
     </article>
     <article class="card">
       <h3>Platobné metódy</h3>
@@ -138,12 +138,13 @@ function render(){
     ['Korekcie',money(s.adjustments_total),'súčet cenových korekcií']
   ].map(x=>'<div class="kpi"><small>'+x[0]+'</small><b>'+x[1]+'</b><span>'+x[2]+'</span></div>').join('');
 
-  const daily=Array.isArray(d.daily)?d.daily:[];
-  const max=Math.max(1,...daily.map(x=>Number(x.revenue||0)));
-  revenueChart.innerHTML=daily.length?daily.map(x=>{
-    const val=Number(x.revenue||0),height=Math.max(2,Math.round(val/max*150));
-    const label=new Date(x.day+'T12:00:00').toLocaleDateString('sk-SK',{day:'2-digit',month:'2-digit'});
-    return '<div class="bar-col" title="'+label+' · '+money(val)+'"><span class="bar-value">'+money(val)+'</span><span class="bar" style="height:'+height+'px"></span><span class="bar-label">'+label+'</span></div>';
+  const hourly=Array.isArray(d.hourly_utilization)?d.hourly_utilization:[];
+  utilizationChart.innerHTML=hourly.length?hourly.map(x=>{
+    const pct=Math.max(0,Math.min(100,Number(x.utilization_percent||0)));
+    const height=Math.max(2,Math.round(pct/100*150));
+    const hour=String(Number(x.hour_of_day||0)).padStart(2,'0')+':00';
+    const occupiedHours=(Number(x.occupied_seconds||0)/3600).toFixed(1);
+    return '<div class="bar-col" title="'+hour+' · '+pct.toFixed(1)+' % · '+occupiedHours+' h obsadenia"><span class="bar-value">'+pct.toFixed(0)+'%</span><span class="bar" style="height:'+height+'px"></span><span class="bar-label">'+hour+'</span></div>';
   }).join(''):'<div class="empty">Bez dát za toto obdobie.</div>';
 
   const stations=Array.isArray(d.stations)?d.stations:[];
