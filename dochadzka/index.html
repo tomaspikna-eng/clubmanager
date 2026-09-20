@@ -183,13 +183,13 @@ async function load(){
  const from=new Date(new Date().getFullYear(),new Date().getMonth()-2,1).toISOString();
  const to=new Date(new Date().getFullYear(),new Date().getMonth()+2,1).toISOString().slice(0,10);
  const [club,emp,ses,sch]=await Promise.all([
-  A.db.from('clubs').select('dochadzka_enabled').eq('id',cid).single(),
+  A.db.from('clubs').select('attendance_enabled').eq('id',cid).single(),
   A.db.from('club_employees').select('*').eq('club_id',cid).eq('is_active',true).order('full_name'),
-  A.db.from('club_dochadzka_sessions').select('*').eq('club_id',cid).gte('clock_in_at',from).order('clock_in_at',{ascending:false}),
+  A.db.from('club_attendance_sessions').select('*').eq('club_id',cid).gte('clock_in_at',from).order('clock_in_at',{ascending:false}),
   A.db.from('club_employee_schedule').select('*').eq('club_id',cid).lte('work_date',to).gte('work_date',from.slice(0,10)).order('work_date')
  ]);
  const err=club.error||emp.error||ses.error||sch.error;if(err)throw err;
- enabled=!!club.data?.dochadzka_enabled;employees=emp.data||[];sessions=ses.data||[];schedule=sch.data||[];
+ enabled=!!club.data?.attendance_enabled;employees=emp.data||[];sessions=ses.data||[];schedule=sch.data||[];
  if(!selectedEmployee||!employees.some(e=>e.id===selectedEmployee.id))selectedEmployee=employees[0]||null;
  render();
 }
@@ -250,11 +250,11 @@ employeeSelect.onchange=()=>{selectedEmployee=employees.find(e=>e.id===employeeS
 employeeMode.onclick=()=>{admin=false;appRoot.classList.remove('admin-mode');employeeMode.classList.add('active');adminMode.classList.remove('active')};
 adminMode.onclick=()=>{admin=true;appRoot.classList.add('admin-mode');adminMode.classList.add('active');employeeMode.classList.remove('active')};
 idChip.onclick=()=>barcode.classList.toggle('show');prevWeek.onclick=()=>{weekOffset--;renderCalendar()};nextWeek.onclick=()=>{weekOffset++;renderCalendar()};
-enableModule.onclick=async()=>{const {error}=await A.db.rpc('club_manager_set_dochadzka_enabled',{p_enabled:true});if(error)return show(error.message);enabled=true;render()};
+enableModule.onclick=async()=>{const {error}=await A.db.rpc('club_manager_set_attendance_enabled',{p_enabled:true});if(error)return show(error.message);enabled=true;render()};
 clockAction.onclick=async()=>{const e=selectedEmployee;if(!e)return;const s=activeFor(e.id);try{
- if(!s){const {error}=await A.db.rpc('club_manager_dochadzka_clock_in',{p_employee_id:e.id});if(error)throw error}
- else if(s.status==='working'){if(confirm('OK = prestávka, Zrušiť = odchod')){const {error}=await A.db.rpc('club_manager_dochadzka_toggle_break',{p_session_id:s.id});if(error)throw error}else{const {error}=await A.db.rpc('club_manager_dochadzka_clock_out',{p_session_id:s.id});if(error)throw error}}
- else{if(confirm('OK = pokračovať, Zrušiť = odchod')){const {error}=await A.db.rpc('club_manager_dochadzka_toggle_break',{p_session_id:s.id});if(error)throw error}else{const {error}=await A.db.rpc('club_manager_dochadzka_clock_out',{p_session_id:s.id});if(error)throw error}}
+ if(!s){const {error}=await A.db.rpc('club_manager_attendance_clock_in',{p_employee_id:e.id});if(error)throw error}
+ else if(s.status==='working'){if(confirm('OK = prestávka, Zrušiť = odchod')){const {error}=await A.db.rpc('club_manager_attendance_toggle_break',{p_session_id:s.id});if(error)throw error}else{const {error}=await A.db.rpc('club_manager_attendance_clock_out',{p_session_id:s.id});if(error)throw error}}
+ else{if(confirm('OK = pokračovať, Zrušiť = odchod')){const {error}=await A.db.rpc('club_manager_attendance_toggle_break',{p_session_id:s.id});if(error)throw error}else{const {error}=await A.db.rpc('club_manager_attendance_clock_out',{p_session_id:s.id});if(error)throw error}}
  await load();
  }catch(err){show(err.message)}
 };
