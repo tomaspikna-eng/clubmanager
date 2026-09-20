@@ -945,7 +945,7 @@ function syncSettingsUI(){
   $("setTargetWrap").classList.toggle("hidden",m!=="universal");
   $("doubleOutWrap").classList.toggle("hidden",m!=="darts");
   $("altBreakWrap").classList.toggle("hidden",m!=="frame"&&m!=="points");
-  $("raceLabel").textContent = m==="darts"?"Race to (legy)" : m==="universal"?"Race to (sety)" : "Race to (frames)";
+  $("raceLabel").textContent = m==="darts"?"Počet legov / Race to" : m==="universal"?"Race to (sety)" : "Race to (frames)";
 }
 
 /* ════════════════════ WIRING ════════════════════ */
@@ -1181,10 +1181,10 @@ if(DEVICE_TOKEN){
   if(!state.log.length){addLog("Scoreboard pripravený");render();}
 }
 
-/* ── Lock mód pre tablety (?lock=1) — skryje prepínač športu + nastavenia ── */
+/* ── Lock mód pre tablety (?lock=1) — zamkne šport, ale nechá nastavenie hry dostupné.
+   Obsluha/hráči musia vedieť zmeniť disciplínu, počet hráčov a Race to/počet legov. ── */
 if(URL_PARAMS.get("lock")==="1"){
   $("sportTabs").classList.add("hidden");
-  document.querySelector(".settings").classList.add("hidden");
 }
 </script>
 </body>
